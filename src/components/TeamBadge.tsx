@@ -1,7 +1,9 @@
-// A license-safe stylized crest: a two-tone shield with the team abbreviation.
-// We don't ship real NHL logos; this keeps each team visually distinct using
-// its actual colors.
+// Team crest. Prefers the NHL's official logo SVG (served from their public
+// CDN) and falls back to a license-safe, color-coded lettermark if the logo
+// can't load. The logos are NHL trademarks — displayed here from the league's
+// own assets, intended for personal/non-commercial use.
 
+import { useState } from 'react'
 import type { Team } from '../types'
 
 interface Props {
@@ -10,11 +12,39 @@ interface Props {
   className?: string
 }
 
+function logoUrl(teamId: string): string {
+  return `https://assets.nhle.com/logos/nhl/svg/${teamId}_light.svg`
+}
+
 export function TeamBadge({ team, size = 64, className = '' }: Props) {
+  const [useFallback, setUseFallback] = useState(false)
+
+  if (!useFallback) {
+    return (
+      <div
+        className={`grid shrink-0 place-items-center rounded-full bg-rink-800/60 ring-1 ring-rink-700 ${className}`}
+        style={{ width: size, height: size }}
+      >
+        <img
+          src={logoUrl(team.id)}
+          alt={`${team.city} ${team.name}`}
+          onError={() => setUseFallback(true)}
+          loading="lazy"
+          style={{ width: size * 0.78, height: size * 0.78, objectFit: 'contain' }}
+        />
+      </div>
+    )
+  }
+
+  return <LetterCrest team={team} size={size} className={className} />
+}
+
+/** The original two-tone lettermark, used when the official logo is unavailable. */
+function LetterCrest({ team, size, className }: Props & { size: number }) {
   const { primary, secondary } = team.colors
   return (
     <div
-      className={`relative grid place-items-center rounded-full shadow-inner ${className}`}
+      className={`relative grid shrink-0 place-items-center rounded-full shadow-inner ${className}`}
       style={{
         width: size,
         height: size,
@@ -48,7 +78,6 @@ function shade(hex: string, percent: number): string {
   return `rgb(${nr}, ${ng}, ${nb})`
 }
 
-/** Pick whichever of white / the secondary color reads better on primary. */
 function readableOn(primary: string, secondary: string): string {
   return luminance(primary) > 0.5 ? shade(primary, -70) : lightEnough(secondary) ? secondary : '#ffffff'
 }

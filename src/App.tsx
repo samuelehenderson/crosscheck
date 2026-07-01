@@ -9,12 +9,29 @@ import { TeamPage } from './pages/TeamPage'
 import { LeaguePage } from './pages/LeaguePage'
 import { FreeAgentsPage } from './pages/FreeAgentsPage'
 
+function BrandMark() {
+  // Crossed hockey sticks over a puck — reads as a hockey emblem, not an "×".
+  return (
+    <div className="grid h-9 w-9 place-items-center rounded-lg bg-rink-800 ring-1 ring-ice-400/30">
+      <svg viewBox="0 0 32 32" className="h-6 w-6" aria-hidden>
+        <g stroke="#a7cbf0" strokeWidth="2.6" strokeLinecap="round" fill="none">
+          {/* left stick + blade */}
+          <path d="M10 6.5 L20 22" />
+          <path d="M20 22 L24.5 20.5" />
+          {/* right stick + blade */}
+          <path d="M22 6.5 L12 22" />
+          <path d="M12 22 L7.5 20.5" />
+        </g>
+        <circle cx="16" cy="25.5" r="2.1" fill="#e5484d" />
+      </svg>
+    </div>
+  )
+}
+
 function Brand() {
   return (
     <Link to="/" className="flex items-center gap-2">
-      <div className="grid h-8 w-8 place-items-center rounded-lg bg-rink-800 ring-1 ring-ice-400/30">
-        <span className="text-ice-300">✕</span>
-      </div>
+      <BrandMark />
       <div className="leading-none">
         <div className="text-sm font-black tracking-tight text-white">CROSSCHECK</div>
         <div className="text-[10px] uppercase tracking-widest text-slate-500">NHL Trade Sim</div>
