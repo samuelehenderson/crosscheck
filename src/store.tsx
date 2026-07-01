@@ -41,6 +41,9 @@ interface StoreValue {
   hasTrades: boolean
   /** ISO timestamp of when the bundled rosters were last refreshed. */
   updatedAt: string
+  /** When true, clicking a roster player opens the trade flow. */
+  tradeMode: boolean
+  setTradeMode: (v: boolean) => void
 }
 
 const StoreContext = createContext<StoreValue | null>(null)
@@ -58,6 +61,7 @@ function loadAssets(): TradeAsset[] {
 
 export function StoreProvider({ children }: { children: ReactNode }) {
   const [assets, setAssets] = useState<TradeAsset[]>(loadAssets)
+  const [tradeMode, setTradeMode] = useState(false)
 
   useEffect(() => {
     try {
@@ -100,6 +104,8 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     ownerOf: applied.ownerOf,
     hasTrades: assets.length > 0,
     updatedAt: UPDATED_AT,
+    tradeMode,
+    setTradeMode,
   }
 
   return <StoreContext.Provider value={value}>{children}</StoreContext.Provider>

@@ -46,15 +46,10 @@ export function PlayerCard({ player, team, isNew, onTrade }: Props) {
   const rating = player.overall
   const stat = statLine(player.stats)
   const injury = player.injury
+  const interactive = !!onTrade
 
-  return (
-    <button
-      type="button"
-      onClick={() => onTrade?.(player)}
-      className="group relative flex w-full items-center gap-2 rounded-lg border border-rink-700 bg-rink-850/70 px-2 py-2 text-left transition hover:border-ice-400/40 hover:bg-rink-800"
-      style={{ borderBottom: `2px solid ${team.colors.primary}` }}
-      title={onTrade ? `Trade ${player.name}` : player.name}
-    >
+  const inner = (
+    <>
       <div
         className="grid h-8 w-8 shrink-0 place-items-center rounded-full text-[10px] font-bold text-white"
         style={{
@@ -90,6 +85,32 @@ export function PlayerCard({ player, team, isNew, onTrade }: Props) {
       >
         {rating}
       </span>
+    </>
+  )
+
+  const base =
+    'group relative flex w-full items-center gap-2 rounded-lg border border-rink-700 bg-rink-850/70 px-2 py-2 text-left'
+  const borderStyle = { borderBottom: `2px solid ${team.colors.primary}` }
+
+  // Interactive only in trade mode; otherwise a plain, non-clickable card
+  // (the plain click is reserved for a future player-detail view).
+  if (!interactive) {
+    return (
+      <div className={base} style={borderStyle} title={player.name}>
+        {inner}
+      </div>
+    )
+  }
+
+  return (
+    <button
+      type="button"
+      onClick={() => onTrade?.(player)}
+      className={`${base} cursor-pointer transition hover:border-ice-400/40 hover:bg-rink-800`}
+      style={borderStyle}
+      title={`Trade ${player.name}`}
+    >
+      {inner}
     </button>
   )
 }

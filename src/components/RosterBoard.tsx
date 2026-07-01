@@ -7,7 +7,7 @@ import { PlayerCard } from './PlayerCard'
 interface Props {
   team: Team
   originOf: Map<string, string>
-  onTrade: (player: Player) => void
+  onTrade?: (player: Player) => void
 }
 
 const GROUPS: { key: Position; label: string }[][] = [
@@ -34,7 +34,7 @@ function Column({
   players: Player[]
   team: Team
   originOf: Map<string, string>
-  onTrade: (player: Player) => void
+  onTrade?: (player: Player) => void
 }) {
   return (
     <div>

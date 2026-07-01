@@ -75,11 +75,30 @@ export function TeamPage() {
 
       <div className="grid grid-cols-1 gap-5 xl:grid-cols-[1fr_320px]">
         <div className="rounded-2xl border border-rink-700 bg-rink-900/40 p-4 sm:p-5">
-          <RosterBoard team={team} originOf={store.originOf} onTrade={setTradingPlayer} />
+          <div className="mb-4 flex items-center justify-between">
+            <h2 className="text-sm font-semibold uppercase tracking-widest text-slate-500">Roster</h2>
+            <button
+              onClick={() => store.setTradeMode(!store.tradeMode)}
+              className={`rounded-lg px-3 py-1.5 text-sm font-semibold transition ${
+                store.tradeMode
+                  ? 'bg-ice-400 text-rink-950 hover:bg-ice-300'
+                  : 'bg-rink-800 text-slate-200 ring-1 ring-rink-700 hover:bg-rink-700'
+              }`}
+            >
+              {store.tradeMode ? '⇄ Trade mode: On' : '⇄ Trade'}
+            </button>
+          </div>
+          <RosterBoard
+            team={team}
+            originOf={store.originOf}
+            onTrade={store.tradeMode ? setTradingPlayer : undefined}
+          />
           <p className="mt-4 text-center text-[11px] text-slate-600">
-            Click any player to trade them.{' '}
-            {STATS_SEASON ? `Stat lines are ${STATS_SEASON} totals. ` : ''}Ratings are editable
-            estimates, not official.
+            {store.tradeMode
+              ? 'Tap any player to move them to another team.'
+              : 'Tap “Trade” to start moving players.'}{' '}
+            {STATS_SEASON ? `Stat lines are ${STATS_SEASON} totals. ` : ''}Ratings are estimates, not
+            official.
           </p>
         </div>
 
