@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { Link, Navigate, Route, Routes } from 'react-router-dom'
 import { StoreProvider, useStore } from './store'
 import { TeamList } from './components/TeamList'
+import { PlayerSearch } from './components/PlayerSearch'
 import { TeamPage } from './pages/TeamPage'
 import { LeaguePage } from './pages/LeaguePage'
 
@@ -51,7 +52,7 @@ function Shell() {
             ☰
           </button>
           <Brand />
-          <nav className="ml-4 hidden items-center gap-1 sm:flex">
+          <nav className="ml-2 hidden items-center gap-1 sm:flex">
             <Link
               to="/league"
               className="rounded-lg px-3 py-1.5 text-sm font-medium text-slate-300 transition hover:bg-rink-850 hover:text-white"
@@ -59,7 +60,8 @@ function Shell() {
               Power Rankings
             </Link>
           </nav>
-          <div className="ml-auto">
+          <div className="ml-auto flex items-center gap-3">
+            <PlayerSearch />
             <TradeCountPill />
           </div>
         </div>
