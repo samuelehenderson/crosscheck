@@ -20,9 +20,11 @@ export function TeamBadge({ team, size = 64, className = '' }: Props) {
   const [useFallback, setUseFallback] = useState(false)
 
   if (!useFallback) {
+    // No circular chrome — the logo art has its own shape, so filling the box
+    // makes it read at full size instead of floating in a padded circle.
     return (
       <div
-        className={`grid shrink-0 place-items-center rounded-full bg-rink-800/60 ring-1 ring-rink-700 ${className}`}
+        className={`grid shrink-0 place-items-center ${className}`}
         style={{ width: size, height: size }}
       >
         <img
@@ -30,7 +32,7 @@ export function TeamBadge({ team, size = 64, className = '' }: Props) {
           alt={`${team.city} ${team.name}`}
           onError={() => setUseFallback(true)}
           loading="lazy"
-          style={{ width: size * 0.78, height: size * 0.78, objectFit: 'contain' }}
+          style={{ width: size, height: size, objectFit: 'contain' }}
         />
       </div>
     )
