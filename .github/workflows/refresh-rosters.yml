@@ -1,0 +1,40 @@
+name: Refresh rosters
+
+# Pulls current rosters from the NHL feed and commits them, so the deployed
+# site stays up to date even if Vercel's serverless IPs are blocked by the NHL
+# API. Runs on a schedule and can be triggered manually.
+
+on:
+  schedule:
+    - cron: '0 */6 * * *' # every 6 hours
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: refresh-rosters
+  cancel-in-progress: false
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Fetch rosters from the NHL feed
+        run: node scripts/fetch-rosters.mjs
+      - name: Commit refreshed rosters
+        run: |
+          if [[ -n "$(git status --porcelain)" ]]; then
+            git config user.name "crosscheck-bot"
+            git config user.email "actions@users.noreply.github.com"
+            git add src/data/*.json api/_seed.js
+            git commit -m "chore: refresh rosters from NHL feed [skip ci]"
+            git push
+            echo "Committed refreshed rosters."
+          else
+            echo "No roster changes to commit."
+          fi
