@@ -11,12 +11,7 @@
 // so this stays a single source of truth. If the NHL feed is unreachable for a
 // team, that team falls back to its seed roster; nothing ever 500s the client.
 
-import atlantic from '../src/data/atlantic.json'
-import metropolitan from '../src/data/metropolitan.json'
-import central from '../src/data/central.json'
-import pacific from '../src/data/pacific.json'
-
-const SEED = [...atlantic, ...metropolitan, ...central, ...pacific]
+import { SEED } from './_seed.js'
 
 // name -> curated rating object (last write wins for players on multiple teams)
 const RATINGS = new Map()
@@ -100,6 +95,22 @@ async function fetchTeamRoster(code) {
 }
 
 export default async function handler(req, res) {
+  try {
+    return await run(req, res)
+  } catch (err) {
+    // Last-resort guard: never 500 the client. Serve seed + the error message.
+    res.setHeader('Cache-Control', 's-maxage=30')
+    res.status(200).json({
+      source: 'seed',
+      liveCount: 0,
+      total: Array.isArray(SEED) ? SEED.length : 0,
+      error: err instanceof Error ? err.message : String(err),
+      teams: SEED,
+    })
+  }
+}
+
+async function run(req, res) {
   const errors = []
   let liveCount = 0
 

@@ -9,7 +9,8 @@
     "build": "tsc --noEmit && vite build",
     "preview": "vite preview",
     "lint": "tsc --noEmit",
-    "test": "vitest run"
+    "test": "vitest run",
+    "gen:seed": "node scripts/gen-seed.mjs"
   },
   "dependencies": {
     "react": "^18.3.1",
