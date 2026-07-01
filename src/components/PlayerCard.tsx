@@ -1,0 +1,61 @@
+// A single roster row: initials avatar, name, overall rating, optional NEW
+// badge for trade acquisitions, and a hover action to trade the player.
+
+import type { Player, Team } from '../types'
+import { initials } from '../lib/format'
+
+interface Props {
+  player: Player
+  team: Team
+  isNew?: boolean
+  onTrade?: (player: Player) => void
+}
+
+function ratingTone(overall: number): string {
+  if (overall >= 90) return 'bg-amber-400/20 text-amber-300 ring-amber-400/30'
+  if (overall >= 83) return 'bg-emerald-400/15 text-emerald-300 ring-emerald-400/25'
+  if (overall >= 75) return 'bg-ice-400/15 text-ice-300 ring-ice-400/25'
+  return 'bg-rink-700 text-slate-300 ring-rink-600'
+}
+
+export function PlayerCard({ player, team, isNew, onTrade }: Props) {
+  const [first, ...rest] = player.name.split(' ')
+  const last = rest.join(' ')
+  const rating = player.overall
+
+  return (
+    <button
+      type="button"
+      onClick={() => onTrade?.(player)}
+      className="group relative flex w-full items-center gap-2 rounded-lg border border-rink-700 bg-rink-850/70 px-2 py-2 text-left transition hover:border-ice-400/40 hover:bg-rink-800"
+      style={{ borderBottom: `2px solid ${team.colors.primary}` }}
+      title={onTrade ? `Trade ${player.name}` : player.name}
+    >
+      <div
+        className="grid h-8 w-8 shrink-0 place-items-center rounded-full text-[10px] font-bold text-white"
+        style={{
+          background: `linear-gradient(135deg, ${team.colors.primary}, ${team.colors.secondary})`,
+        }}
+      >
+        {initials(player.name)}
+      </div>
+
+      <div className="min-w-0 flex-1 leading-tight">
+        <div className="truncate text-[10px] text-slate-400">{first}</div>
+        <div className="truncate text-[13px] font-semibold text-slate-100">{last || first}</div>
+      </div>
+
+      {isNew && (
+        <span className="rounded bg-up/20 px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wide text-up">
+          New
+        </span>
+      )}
+
+      <span
+        className={`grid h-7 min-w-[1.9rem] place-items-center rounded px-1 text-xs font-bold tabular-nums ring-1 ${ratingTone(rating)}`}
+      >
+        {rating}
+      </span>
+    </button>
+  )
+}

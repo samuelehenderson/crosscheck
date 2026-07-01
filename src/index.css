@@ -1,0 +1,32 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color-scheme: dark;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+body {
+  @apply bg-rink-950 text-slate-200 font-display antialiased;
+  margin: 0;
+}
+
+/* Thin, dark scrollbars to match the app chrome */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: #2a3547 transparent;
+}
+*::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+*::-webkit-scrollbar-thumb {
+  background: #2a3547;
+  border-radius: 4px;
+}
