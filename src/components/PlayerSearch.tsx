@@ -1,20 +1,26 @@
 // League-wide player search in the top bar. Type any player (or team) name to
-// find them across all 32 rosters and jump to their team. Keyboard friendly:
-// ↑/↓ to move, Enter to open, Esc to close.
+// find rostered players — and free agents — and jump to them. Keyboard
+// friendly: ↑/↓ to move, Enter to open, Esc to close.
 
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useStore } from '../store'
+import { FREE_AGENTS } from '../data'
 import { TeamBadge } from './TeamBadge'
 import { initials } from '../lib/format'
-import type { Player, Team } from '../types'
+import type { Team } from '../types'
 
 interface Hit {
-  player: Player
-  /** The team the player is currently on (after any trades). */
-  team: Team
-  /** True when a pending trade moved them off their original team. */
-  moved: boolean
+  key: string
+  name: string
+  position: string
+  overall: number
+  /** Present for rostered players; undefined for free agents. */
+  team?: Team
+  /** True when a pending trade moved a rostered player. */
+  moved?: boolean
+  /** Where selecting the result navigates to. */
+  navTo: string
 }
 
 export function PlayerSearch() {
@@ -26,22 +32,35 @@ export function PlayerSearch() {
   const rootRef = useRef<HTMLDivElement>(null)
   const inputRef = useRef<HTMLInputElement>(null)
 
-  // Flat index of every player mapped to their current (after-trade) team.
+  // Flat index: every rostered player (mapped to their current team) plus every
+  // free agent (linking to the Free Agents page).
   const index = useMemo<Hit[]>(() => {
     const teamById = new Map(afterTeams.map((t) => [t.id, t]))
-    return baseTeams.flatMap((t) =>
+    const rostered: Hit[] = baseTeams.flatMap((t) =>
       t.roster.map((player) => {
         const currentTeamId = originOf.has(player.id)
-          ? // originOf maps moved players -> their ORIGIN, so find where they are now
-            afterTeams.find((at) => at.roster.some((p) => p.id === player.id))?.id ?? t.id
+          ? afterTeams.find((at) => at.roster.some((p) => p.id === player.id))?.id ?? t.id
           : t.id
+        const team = teamById.get(currentTeamId) ?? t
         return {
-          player,
-          team: teamById.get(currentTeamId) ?? t,
+          key: player.id,
+          name: player.name,
+          position: player.position,
+          overall: player.overall,
+          team,
           moved: originOf.has(player.id),
+          navTo: `/team/${team.id}`,
         }
       }),
     )
+    const freeAgents: Hit[] = [...FREE_AGENTS.skaters, ...FREE_AGENTS.goalies].map((fa) => ({
+      key: `fa-${fa.name}`,
+      name: fa.name,
+      position: fa.position,
+      overall: fa.overall,
+      navTo: '/free-agents',
+    }))
+    return [...rostered, ...freeAgents]
   }, [baseTeams, afterTeams, originOf])
 
   const results = useMemo<Hit[]>(() => {
@@ -49,13 +68,14 @@ export function PlayerSearch() {
     if (!s) return []
     return index
       .filter(
-        ({ player, team }) =>
-          player.name.toLowerCase().includes(s) ||
-          team.name.toLowerCase().includes(s) ||
-          team.city.toLowerCase().includes(s) ||
-          team.id.toLowerCase() === s,
+        (h) =>
+          h.name.toLowerCase().includes(s) ||
+          (h.team &&
+            (h.team.name.toLowerCase().includes(s) ||
+              h.team.city.toLowerCase().includes(s) ||
+              h.team.id.toLowerCase() === s)),
       )
-      .sort((a, b) => b.player.overall - a.player.overall)
+      .sort((a, b) => b.overall - a.overall)
       .slice(0, 8)
   }, [index, query])
 
@@ -84,7 +104,7 @@ export function PlayerSearch() {
   }, [])
 
   const choose = (hit: Hit) => {
-    navigate(`/team/${hit.team.id}`)
+    navigate(hit.navTo)
     setQuery('')
     setOpen(false)
     inputRef.current?.blur()
@@ -131,7 +151,7 @@ export function PlayerSearch() {
           ) : (
             <ul className="max-h-80 overflow-y-auto py-1">
               {results.map((hit, i) => (
-                <li key={hit.player.id}>
+                <li key={hit.key}>
                   <button
                     onMouseEnter={() => setActive(i)}
                     onClick={() => choose(hit)}
@@ -142,26 +162,39 @@ export function PlayerSearch() {
                     <div
                       className="grid h-8 w-8 shrink-0 place-items-center rounded-full text-[10px] font-bold text-white"
                       style={{
-                        background: `linear-gradient(135deg, ${hit.team.colors.primary}, ${hit.team.colors.secondary})`,
+                        background: hit.team
+                          ? `linear-gradient(135deg, ${hit.team.colors.primary}, ${hit.team.colors.secondary})`
+                          : 'linear-gradient(135deg, #2a3547, #18202f)',
                       }}
                     >
-                      {initials(hit.player.name)}
+                      {initials(hit.name)}
                     </div>
                     <div className="min-w-0 flex-1">
                       <div className="truncate text-sm font-semibold text-slate-100">
-                        {hit.player.name}
+                        {hit.name}
                         {hit.moved && (
                           <span className="ml-1.5 rounded bg-up/20 px-1 py-0.5 text-[9px] font-bold uppercase text-up">
                             Traded
                           </span>
                         )}
+                        {!hit.team && (
+                          <span className="ml-1.5 rounded bg-amber-400/20 px-1 py-0.5 text-[9px] font-bold uppercase text-amber-300">
+                            FA
+                          </span>
+                        )}
                       </div>
                       <div className="truncate text-[11px] text-slate-500">
-                        {hit.player.position} · {hit.player.overall} OVR · {hit.team.city}{' '}
-                        {hit.team.name}
+                        {hit.position} · {hit.overall} OVR ·{' '}
+                        {hit.team ? `${hit.team.city} ${hit.team.name}` : 'Free agent'}
                       </div>
                     </div>
-                    <TeamBadge team={hit.team} size={24} />
+                    {hit.team ? (
+                      <TeamBadge team={hit.team} size={24} />
+                    ) : (
+                      <span className="grid h-6 w-6 shrink-0 place-items-center rounded-full bg-rink-700 text-[9px] font-bold text-slate-400">
+                        FA
+                      </span>
+                    )}
                   </button>
                 </li>
               ))}

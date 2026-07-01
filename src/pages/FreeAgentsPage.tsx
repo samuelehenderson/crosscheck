@@ -35,8 +35,8 @@ function SkaterTable({ skaters }: { skaters: FreeAgent[] }) {
     { key: 'overall', label: 'OVR' },
   ]
   return (
-    <div className="overflow-hidden rounded-2xl border border-rink-700">
-      <table className="w-full border-collapse text-sm">
+    <div className="overflow-x-auto rounded-2xl border border-rink-700">
+      <table className="w-full min-w-[600px] border-collapse text-sm">
         <thead>
           <tr className="bg-rink-850 text-left text-[11px] uppercase tracking-wider text-slate-500">
             <th className="px-3 py-2.5 font-semibold">#</th>
@@ -62,7 +62,7 @@ function SkaterTable({ skaters }: { skaters: FreeAgent[] }) {
               <td className="px-3 py-2">
                 <div className="flex items-center gap-2.5">
                   <Avatar name={p.name} />
-                  <span className="font-medium text-slate-200">{p.name}</span>
+                  <span className="whitespace-nowrap font-medium text-slate-200">{p.name}</span>
                 </div>
               </td>
               <td className="px-3 py-2 text-slate-400">{posLabel(p.position)}</td>
@@ -86,8 +86,8 @@ function SkaterTable({ skaters }: { skaters: FreeAgent[] }) {
 
 function GoalieTable({ goalies }: { goalies: FreeAgent[] }) {
   return (
-    <div className="overflow-hidden rounded-2xl border border-rink-700">
-      <table className="w-full border-collapse text-sm">
+    <div className="overflow-x-auto rounded-2xl border border-rink-700">
+      <table className="w-full min-w-[560px] border-collapse text-sm">
         <thead>
           <tr className="bg-rink-850 text-left text-[11px] uppercase tracking-wider text-slate-500">
             <th className="px-3 py-2.5 font-semibold">#</th>
@@ -106,7 +106,7 @@ function GoalieTable({ goalies }: { goalies: FreeAgent[] }) {
               <td className="px-3 py-2">
                 <div className="flex items-center gap-2.5">
                   <Avatar name={g.name} />
-                  <span className="font-medium text-slate-200">{g.name}</span>
+                  <span className="whitespace-nowrap font-medium text-slate-200">{g.name}</span>
                 </div>
               </td>
               <td className="px-3 py-2 text-right tabular-nums text-slate-300">{g.gamesPlayed}</td>
@@ -140,6 +140,7 @@ export function FreeAgentsPage() {
           Players who logged NHL time in {season || 'the last season'} but aren't on any current
           roster.
         </p>
+        <p className="mt-1 text-[11px] text-slate-600 sm:hidden">Swipe the table sideways to see all columns →</p>
       </div>
 
       {empty ? (

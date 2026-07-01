@@ -37,8 +37,8 @@ export function LeaguePage() {
         </p>
       </div>
 
-      <div className="overflow-hidden rounded-2xl border border-rink-700">
-        <table className="w-full border-collapse text-sm">
+      <div className="overflow-x-auto rounded-2xl border border-rink-700">
+        <table className="w-full min-w-[560px] border-collapse text-sm">
           <thead>
             <tr className="bg-rink-850 text-left text-[11px] uppercase tracking-wider text-slate-500">
               <th className="px-3 py-2.5 font-semibold">#</th>
@@ -68,7 +68,7 @@ export function LeaguePage() {
                 <td className="px-3 py-2">
                   <Link to={`/team/${team.id}`} className="flex items-center gap-2.5 group">
                     <TeamBadge team={team} size={26} />
-                    <span className="font-medium text-slate-200 group-hover:text-white">
+                    <span className="whitespace-nowrap font-medium text-slate-200 group-hover:text-white">
                       {team.city} {team.name}
                     </span>
                   </Link>
