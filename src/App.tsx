@@ -1,7 +1,7 @@
 // App shell: brand bar, left team-navigation rail, and routed content.
 
 import { useState } from 'react'
-import { Link, Navigate, Route, Routes } from 'react-router-dom'
+import { Link, NavLink, Navigate, Route, Routes } from 'react-router-dom'
 import { StoreProvider, useStore } from './store'
 import { TeamList } from './components/TeamList'
 import { PlayerSearch } from './components/PlayerSearch'
@@ -100,6 +100,35 @@ function Shell() {
           } fixed inset-x-0 bottom-0 top-[57px] z-30 overflow-y-auto bg-rink-950 p-4 lg:static lg:z-0 lg:block lg:w-64 lg:shrink-0 lg:bg-transparent lg:p-0`}
         >
           <div className="lg:sticky lg:top-[73px]">
+            {/* Section links — shown here on mobile since the top-bar nav is
+                hidden on small screens. */}
+            <div className="mb-4 flex flex-col gap-1 lg:hidden">
+              <NavLink
+                to="/league"
+                onClick={() => setMobileOpen(false)}
+                className={({ isActive }) =>
+                  `rounded-lg px-3 py-2 text-sm font-semibold transition ${
+                    isActive ? 'bg-rink-800 text-white' : 'text-slate-300 hover:bg-rink-850'
+                  }`
+                }
+              >
+                Power Rankings
+              </NavLink>
+              <NavLink
+                to="/free-agents"
+                onClick={() => setMobileOpen(false)}
+                className={({ isActive }) =>
+                  `rounded-lg px-3 py-2 text-sm font-semibold transition ${
+                    isActive ? 'bg-rink-800 text-white' : 'text-slate-300 hover:bg-rink-850'
+                  }`
+                }
+              >
+                Free Agents
+              </NavLink>
+              <div className="mt-2 px-1 text-[10px] font-semibold uppercase tracking-widest text-slate-600">
+                Teams
+              </div>
+            </div>
             <TeamList onNavigate={() => setMobileOpen(false)} />
           </div>
         </aside>
