@@ -30,6 +30,8 @@ jobs:
         run: node scripts/fetch-stats.mjs
       - name: Fetch injuries from ESPN
         run: node scripts/fetch-injuries.mjs
+      - name: Build free-agent list
+        run: node scripts/fetch-freeagents.mjs
       - name: Commit refreshed rosters
         run: |
           if [[ -n "$(git status --porcelain)" ]]; then

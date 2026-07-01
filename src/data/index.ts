@@ -7,7 +7,7 @@
 // normalizeTeams() is used for both, so ids match regardless of source — which
 // means an in-progress trade (keyed by player id) survives a live refresh.
 
-import type { Injury, Player, PlayerStats, Position, Team } from '../types'
+import type { FreeAgent, Injury, Player, PlayerStats, Position, Team } from '../types'
 import atlantic from './atlantic.json'
 import metropolitan from './metropolitan.json'
 import central from './central.json'
@@ -15,12 +15,21 @@ import pacific from './pacific.json'
 import updated from './updatedAt.json'
 import statsData from './stats.json'
 import injuriesData from './injuries.json'
+import freeAgentsData from './freeAgents.json'
 
 /** When the bundled rosters were last refreshed from the NHL feed (ISO). */
 export const UPDATED_AT: string = (updated as { updatedAt: string }).updatedAt
 
 /** The season the stat lines belong to, e.g. "2025-26" (may be empty). */
 export const STATS_SEASON: string = (statsData as { season: string }).season || ''
+
+/** Players who played last season but aren't on any current roster. */
+export const FREE_AGENTS = freeAgentsData as {
+  season: string
+  updatedAt: string
+  skaters: FreeAgent[]
+  goalies: FreeAgent[]
+}
 
 const STATS: Record<string, PlayerStats> =
   (statsData as { players?: Record<string, PlayerStats> }).players ?? {}

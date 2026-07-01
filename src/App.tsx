@@ -7,6 +7,7 @@ import { TeamList } from './components/TeamList'
 import { PlayerSearch } from './components/PlayerSearch'
 import { TeamPage } from './pages/TeamPage'
 import { LeaguePage } from './pages/LeaguePage'
+import { FreeAgentsPage } from './pages/FreeAgentsPage'
 
 function Brand() {
   return (
@@ -76,6 +77,12 @@ function Shell() {
             >
               Power Rankings
             </Link>
+            <Link
+              to="/free-agents"
+              className="rounded-lg px-3 py-1.5 text-sm font-medium text-slate-300 transition hover:bg-rink-850 hover:text-white"
+            >
+              Free Agents
+            </Link>
           </nav>
           <div className="ml-auto flex items-center gap-3">
             <DataSourceBadge />
@@ -103,6 +110,7 @@ function Shell() {
             <Route path="/" element={<Navigate to="/team/FLA" replace />} />
             <Route path="/team/:teamId" element={<TeamPage />} />
             <Route path="/league" element={<LeaguePage />} />
+            <Route path="/free-agents" element={<FreeAgentsPage />} />
             <Route path="*" element={<Navigate to="/team/FLA" replace />} />
           </Routes>
         </main>

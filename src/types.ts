@@ -41,6 +41,24 @@ export interface Injury {
   date?: string
 }
 
+/** A player who played last season but isn't on any current NHL roster. */
+export interface FreeAgent {
+  name: string
+  position: Position
+  overall: number
+  gamesPlayed: number
+  // Skater
+  goals?: number
+  assists?: number
+  points?: number
+  // Goalie
+  wins?: number
+  losses?: number
+  gaa?: number
+  savePct?: number
+  isGoalie?: boolean
+}
+
 export interface Player {
   /** Stable id, generated at load time from name + team. */
   id: string
