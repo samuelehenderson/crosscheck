@@ -160,8 +160,8 @@ export function FreeAgentsPage() {
           )}
           <p className="text-center text-[11px] text-slate-600">
             "Free agent" = played last season but isn't currently rostered — this also includes
-            retired players and those now overseas or in the minors. Ratings for unsigned players may
-            be baseline estimates.
+            retired players and those now overseas or in the minors. OVR is estimated from a 3-year,
+            recency-weighted average of production; the stat columns show last season's totals.
           </p>
         </>
       )}
