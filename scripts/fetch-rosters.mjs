@@ -116,13 +116,10 @@ for (const f of DIV_FILES) {
   writeFileSync(fileUrl(f), JSON.stringify(divisions[f]) + '\n')
 }
 
-// Regenerate the embedded seed used by the serverless function.
-const header = `// AUTO-GENERATED from src/data/*.json — do not edit by hand.
-// Regenerate with: npm run gen:seed
-// Embedded as a JS module (not a JSON import) so the Vercel serverless
-// function loads reliably across Node/ESM versions.
+// Stamp when the data was refreshed, for the "Rosters updated" badge.
+writeFileSync(
+  new URL('../src/data/updatedAt.json', import.meta.url),
+  JSON.stringify({ updatedAt: new Date().toISOString() }, null, 2) + '\n',
+)
 
-`
-writeFileSync(new URL('../api/_seed.js', import.meta.url), header + 'export const SEED = ' + JSON.stringify(teams) + '\n')
-
-console.log('Wrote src/data/*.json and api/_seed.js.')
+console.log('Wrote src/data/*.json and src/data/updatedAt.json.')

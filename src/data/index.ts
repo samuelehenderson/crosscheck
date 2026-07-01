@@ -12,6 +12,10 @@ import atlantic from './atlantic.json'
 import metropolitan from './metropolitan.json'
 import central from './central.json'
 import pacific from './pacific.json'
+import updated from './updatedAt.json'
+
+/** When the bundled rosters were last refreshed from the NHL feed (ISO). */
+export const UPDATED_AT: string = (updated as { updatedAt: string }).updatedAt
 
 export interface RawPlayer {
   name: string

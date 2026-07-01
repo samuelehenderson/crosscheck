@@ -48,18 +48,20 @@ All the knobs live in the `TUNING` block at the top of `src/sim/engine.ts`.
 
 ## Data & staying up to date
 
-Rosters are **live**. On load the app calls a Vercel serverless function
-(`api/rosters.js`) that pulls each team's current roster from the official NHL
-feed (`api-web.nhle.com`), so trades and call-ups show up automatically. The
-function merges those rosters with our curated player **ratings** (matched by
-name) — since no NHL feed provides ratings — and assigns a position-based
-baseline to players we don't have yet. Responses are edge-cached for an hour.
+Rosters stay current automatically. A scheduled GitHub Action
+(`.github/workflows/refresh-rosters.yml`) runs every 6 hours, pulls each team's
+current roster from the official NHL feed (`api-web.nhle.com`), and commits the
+refreshed `src/data/*.json` back to `main` — which triggers a redeploy. (The
+Action runs from GitHub's network because the NHL API blocks requests from many
+cloud/serverless IPs, so a runtime fetch from the host isn't reliable.)
 
-The bundled JSON under `src/data/*.json` is the **offline fallback**: if the
-live feed is unreachable, the app shows this seed data instead (and the header
-badge reads "Sample data" rather than "Live rosters"). Ratings are our own
-estimates, not official — edit the JSON to tune them; new ratings you add flow
-through to live players automatically via the name match.
+Because no NHL feed provides player **ratings**, the refresh script keeps our
+curated ratings (matched by name) and assigns a position-based baseline to
+players we don't have yet — so edits you make to ratings flow through to live
+players automatically. The header shows when the rosters were last refreshed.
+
+Run it manually with `npm run fetch:rosters` (needs open internet), or trigger
+the "Refresh rosters" workflow from the GitHub Actions tab.
 
 ## Roadmap / build-on ideas
 

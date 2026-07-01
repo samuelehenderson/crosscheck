@@ -23,19 +23,18 @@ function Brand() {
 }
 
 function DataSourceBadge() {
-  const { dataSource } = useStore()
-  const cfg = {
-    loading: { dot: 'bg-slate-500', text: 'Loading…', title: 'Fetching live rosters' },
-    live: { dot: 'bg-up', text: 'Live rosters', title: 'Rosters from the live NHL feed' },
-    seed: { dot: 'bg-amber-400', text: 'Sample data', title: 'Live feed unavailable — showing bundled sample rosters' },
-  }[dataSource]
+  const { updatedAt } = useStore()
+  const date = new Date(updatedAt)
+  const label = Number.isNaN(date.getTime())
+    ? 'Rosters loaded'
+    : `Rosters ${date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}`
   return (
     <span
-      title={cfg.title}
+      title={`Rosters last refreshed from the NHL feed on ${date.toLocaleString()}`}
       className="hidden items-center gap-1.5 rounded-full bg-rink-850 px-2.5 py-1 text-[11px] font-medium text-slate-400 ring-1 ring-rink-700 md:inline-flex"
     >
-      <span className={`h-1.5 w-1.5 rounded-full ${cfg.dot}`} />
-      {cfg.text}
+      <span className="h-1.5 w-1.5 rounded-full bg-up" />
+      {label}
     </span>
   )
 }
