@@ -13,18 +13,21 @@ import {
   useState,
   type ReactNode,
 } from 'react'
-import { TEAMS } from './data'
-import type { TradeAsset } from './types'
+import { TEAMS, normalizeTeams, type RawTeam } from './data'
+import type { Team, TradeAsset } from './types'
 import { projectLeague } from './sim/engine'
 import { applyTrades } from './sim/trades'
 
 const STORAGE_KEY = 'crosscheck.trades.v1'
 
+/** Where the currently-displayed rosters came from. */
+export type DataSource = 'loading' | 'live' | 'seed'
+
 interface StoreValue {
   /** The unmodified base league. */
-  baseTeams: typeof TEAMS
+  baseTeams: Team[]
   /** The league after pending trades are applied. */
-  afterTeams: typeof TEAMS
+  afterTeams: Team[]
   assets: TradeAsset[]
   addAsset: (asset: TradeAsset) => void
   removeAsset: (playerId: string) => void
@@ -37,6 +40,8 @@ interface StoreValue {
   /** playerId -> current team id after trades. */
   ownerOf: Map<string, string>
   hasTrades: boolean
+  /** Live-data status for the freshness indicator. */
+  dataSource: DataSource
 }
 
 const StoreContext = createContext<StoreValue | null>(null)
@@ -54,6 +59,33 @@ function loadAssets(): TradeAsset[] {
 
 export function StoreProvider({ children }: { children: ReactNode }) {
   const [assets, setAssets] = useState<TradeAsset[]>(loadAssets)
+  const [teams, setTeams] = useState<Team[]>(TEAMS)
+  const [dataSource, setDataSource] = useState<DataSource>('loading')
+
+  // Pull live rosters from our serverless proxy once on mount. The bundled
+  // seed renders instantly; if the live feed answers we swap it in, otherwise
+  // we quietly stay on the seed.
+  useEffect(() => {
+    let cancelled = false
+    fetch('/api/rosters')
+      .then((r) => (r.ok ? (r.json() as Promise<RawTeam[]>) : Promise.reject(new Error('bad status'))))
+      .then((raw) => {
+        if (cancelled) return
+        const normalized = normalizeTeams(raw)
+        if (normalized.length >= 30) {
+          setTeams(normalized)
+          setDataSource('live')
+        } else {
+          setDataSource('seed')
+        }
+      })
+      .catch(() => {
+        if (!cancelled) setDataSource('seed')
+      })
+    return () => {
+      cancelled = true
+    }
+  }, [])
 
   useEffect(() => {
     try {
@@ -79,12 +111,12 @@ export function StoreProvider({ children }: { children: ReactNode }) {
 
   const clearTrades = useCallback(() => setAssets([]), [])
 
-  const applied = useMemo(() => applyTrades(TEAMS, assets), [assets])
-  const before = useMemo(() => projectLeague(TEAMS), [])
+  const applied = useMemo(() => applyTrades(teams, assets), [teams, assets])
+  const before = useMemo(() => projectLeague(teams), [teams])
   const after = useMemo(() => projectLeague(applied.teams), [applied])
 
   const value: StoreValue = {
-    baseTeams: TEAMS,
+    baseTeams: teams,
     afterTeams: applied.teams,
     assets,
     addAsset,
@@ -95,6 +127,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     originOf: applied.originOf,
     ownerOf: applied.ownerOf,
     hasTrades: assets.length > 0,
+    dataSource,
   }
 
   return <StoreContext.Provider value={value}>{children}</StoreContext.Provider>

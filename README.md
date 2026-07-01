@@ -46,11 +46,20 @@ numbers, which is what makes the before → after trade comparison meaningful.
 
 All the knobs live in the `TUNING` block at the top of `src/sim/engine.ts`.
 
-## Data
+## Data & staying up to date
 
-Rosters live as JSON per division under `src/data/` and are approximate,
-editable snapshots of 2025-26 NHL lineups. Player ratings are our own
-estimates, not official — edit the JSON to correct or extend them.
+Rosters are **live**. On load the app calls a Vercel serverless function
+(`api/rosters.js`) that pulls each team's current roster from the official NHL
+feed (`api-web.nhle.com`), so trades and call-ups show up automatically. The
+function merges those rosters with our curated player **ratings** (matched by
+name) — since no NHL feed provides ratings — and assigns a position-based
+baseline to players we don't have yet. Responses are edge-cached for an hour.
+
+The bundled JSON under `src/data/*.json` is the **offline fallback**: if the
+live feed is unreachable, the app shows this seed data instead (and the header
+badge reads "Sample data" rather than "Live rosters"). Ratings are our own
+estimates, not official — edit the JSON to tune them; new ratings you add flow
+through to live players automatically via the name match.
 
 ## Roadmap / build-on ideas
 
