@@ -26,13 +26,17 @@ jobs:
           node-version: 20
       - name: Fetch rosters from the NHL feed
         run: node scripts/fetch-rosters.mjs
+      - name: Fetch season stats from the NHL feed
+        run: node scripts/fetch-stats.mjs
+      - name: Fetch injuries from ESPN
+        run: node scripts/fetch-injuries.mjs
       - name: Commit refreshed rosters
         run: |
           if [[ -n "$(git status --porcelain)" ]]; then
             git config user.name "crosscheck-bot"
             git config user.email "actions@users.noreply.github.com"
             git add src/data/*.json
-            git commit -m "chore: refresh rosters from NHL feed [skip ci]"
+            git commit -m "chore: refresh rosters, stats & injuries [skip ci]"
             git push
             echo "Committed refreshed rosters."
           else

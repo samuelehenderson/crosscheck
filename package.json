@@ -10,7 +10,9 @@
     "preview": "vite preview",
     "lint": "tsc --noEmit",
     "test": "vitest run",
-    "fetch:rosters": "node scripts/fetch-rosters.mjs"
+    "fetch:rosters": "node scripts/fetch-rosters.mjs",
+    "fetch:stats": "node scripts/fetch-stats.mjs",
+    "fetch:injuries": "node scripts/fetch-injuries.mjs"
   },
   "dependencies": {
     "react": "^18.3.1",

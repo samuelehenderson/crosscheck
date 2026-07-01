@@ -1,7 +1,7 @@
-// A single roster row: initials avatar, name, overall rating, optional NEW
-// badge for trade acquisitions, and a hover action to trade the player.
+// A single roster row: initials avatar, name, season stat line, optional
+// injury + NEW badges, overall rating, and a hover action to trade the player.
 
-import type { Player, Team } from '../types'
+import type { Player, PlayerStats, Team } from '../types'
 import { initials } from '../lib/format'
 
 interface Props {
@@ -18,10 +18,34 @@ function ratingTone(overall: number): string {
   return 'bg-rink-700 text-slate-300 ring-rink-600'
 }
 
+/** Compact season stat line, or null if there's nothing worth showing. */
+function statLine(stats: PlayerStats | null | undefined): string | null {
+  if (!stats || !stats.gamesPlayed) return null
+  if (stats.isGoalie) {
+    const parts: string[] = []
+    if (stats.savePct != null) parts.push(`.${Math.round(stats.savePct * 1000)} SV%`)
+    if (stats.wins != null && stats.losses != null) parts.push(`${stats.wins}-${stats.losses}`)
+    return parts.join(' · ') || `${stats.gamesPlayed} GP`
+  }
+  const g = stats.goals ?? 0
+  const a = stats.assists ?? 0
+  const p = stats.points ?? g + a
+  return `${g}G · ${a}A · ${p}P`
+}
+
+/** Color treatment for an injury short-code. */
+function injuryTone(short: string): string {
+  return short === 'DTD' || short === 'Q'
+    ? 'bg-amber-400/20 text-amber-300'
+    : 'bg-down/20 text-down'
+}
+
 export function PlayerCard({ player, team, isNew, onTrade }: Props) {
   const [first, ...rest] = player.name.split(' ')
   const last = rest.join(' ')
   const rating = player.overall
+  const stat = statLine(player.stats)
+  const injury = player.injury
 
   return (
     <button
@@ -43,7 +67,17 @@ export function PlayerCard({ player, team, isNew, onTrade }: Props) {
       <div className="min-w-0 flex-1 leading-tight">
         <div className="truncate text-[10px] text-slate-400">{first}</div>
         <div className="truncate text-[13px] font-semibold text-slate-100">{last || first}</div>
+        {stat && <div className="truncate text-[10px] tabular-nums text-slate-500">{stat}</div>}
       </div>
+
+      {injury && (
+        <span
+          className={`rounded px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wide ${injuryTone(injury.short)}`}
+          title={`${injury.status}${injury.detail ? ` — ${injury.detail}` : ''}`}
+        >
+          {injury.short}
+        </span>
+      )}
 
       {isNew && (
         <span className="rounded bg-up/20 px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wide text-up">

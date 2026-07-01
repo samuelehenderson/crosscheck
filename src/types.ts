@@ -12,6 +12,35 @@ export type Conference = 'Eastern' | 'Western'
 
 export type Division = 'Atlantic' | 'Metropolitan' | 'Central' | 'Pacific'
 
+/** Season stat line for a player (skater or goalie), from the NHL feed. */
+export interface PlayerStats {
+  gamesPlayed: number
+  // Skater
+  goals?: number
+  assists?: number
+  points?: number
+  plusMinus?: number
+  // Goalie
+  wins?: number
+  losses?: number
+  gaa?: number
+  savePct?: number
+  shutouts?: number
+  isGoalie?: boolean
+}
+
+/** Current injury status for a player, from the ESPN injuries feed. */
+export interface Injury {
+  /** Full status text, e.g. "Out", "Day-To-Day". */
+  status: string
+  /** Short code for badges: OUT / DTD / IR / SUS / Q. */
+  short: string
+  /** Free-text detail, e.g. "Lower body". */
+  detail?: string
+  /** ISO date the report was filed. */
+  date?: string
+}
+
 export interface Player {
   /** Stable id, generated at load time from name + team. */
   id: string
@@ -26,6 +55,10 @@ export interface Player {
   finishing: number | null
   /** Goalie rating (null for skaters). */
   goaltending: number | null
+  /** Season stats, attached at load time if available. */
+  stats?: PlayerStats | null
+  /** Current injury, attached at load time if the player is hurt. */
+  injury?: Injury | null
 }
 
 export interface TeamColors {

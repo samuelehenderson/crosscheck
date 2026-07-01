@@ -7,15 +7,30 @@
 // normalizeTeams() is used for both, so ids match regardless of source — which
 // means an in-progress trade (keyed by player id) survives a live refresh.
 
-import type { Player, Position, Team } from '../types'
+import type { Injury, Player, PlayerStats, Position, Team } from '../types'
 import atlantic from './atlantic.json'
 import metropolitan from './metropolitan.json'
 import central from './central.json'
 import pacific from './pacific.json'
 import updated from './updatedAt.json'
+import statsData from './stats.json'
+import injuriesData from './injuries.json'
 
 /** When the bundled rosters were last refreshed from the NHL feed (ISO). */
 export const UPDATED_AT: string = (updated as { updatedAt: string }).updatedAt
+
+/** The season the stat lines belong to, e.g. "2025-26" (may be empty). */
+export const STATS_SEASON: string = (statsData as { season: string }).season || ''
+
+const STATS: Record<string, PlayerStats> =
+  (statsData as { players?: Record<string, PlayerStats> }).players ?? {}
+const INJURIES: Record<string, Injury> =
+  (injuriesData as { players?: Record<string, Injury> }).players ?? {}
+
+/** Normalized name key used to match stats/injuries to players. */
+export function nameKey(name: string): string {
+  return name.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[^a-z0-9]/g, '')
+}
 
 export interface RawPlayer {
   name: string
@@ -57,6 +72,7 @@ function normalizeTeam(raw: RawTeam): Team {
     const n = seen.get(base) ?? 0
     seen.set(base, n + 1)
     const id = n === 0 ? base : `${base}-${n + 1}`
+    const key = nameKey(p.name)
     return {
       id,
       name: p.name,
@@ -67,6 +83,8 @@ function normalizeTeam(raw: RawTeam): Team {
       defense: p.defense,
       finishing: p.finishing,
       goaltending: p.goaltending,
+      stats: STATS[key] ?? null,
+      injury: INJURIES[key] ?? null,
     }
   })
   return {

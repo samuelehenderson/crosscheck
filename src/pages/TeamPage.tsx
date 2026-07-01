@@ -8,8 +8,10 @@ import { useStore } from '../store'
 import { TeamHeader } from '../components/TeamHeader'
 import { RosterBoard } from '../components/RosterBoard'
 import { RanksPanel } from '../components/RanksPanel'
+import { InjuriesPanel } from '../components/InjuriesPanel'
 import { TradePanel } from '../components/TradePanel'
 import { TradeModal } from '../components/TradeModal'
+import { STATS_SEASON } from '../data'
 
 export function TeamPage() {
   const { teamId } = useParams<{ teamId: string }>()
@@ -75,12 +77,15 @@ export function TeamPage() {
         <div className="rounded-2xl border border-rink-700 bg-rink-900/40 p-4 sm:p-5">
           <RosterBoard team={team} originOf={store.originOf} onTrade={setTradingPlayer} />
           <p className="mt-4 text-center text-[11px] text-slate-600">
-            Click any player to trade them. Rosters and ratings are editable estimates, not official.
+            Click any player to trade them.{' '}
+            {STATS_SEASON ? `Stat lines are ${STATS_SEASON} totals. ` : ''}Ratings are editable
+            estimates, not official.
           </p>
         </div>
 
         <aside className="space-y-4">
           <RanksPanel before={before} after={after} hasTrades={store.hasTrades} />
+          <InjuriesPanel team={team} />
           <TradePanel
             assets={store.assets}
             playerById={playerById}
