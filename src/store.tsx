@@ -68,16 +68,19 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     let cancelled = false
     fetch('/api/rosters')
-      .then((r) => (r.ok ? (r.json() as Promise<RawTeam[]>) : Promise.reject(new Error('bad status'))))
-      .then((raw) => {
+      .then((r) => (r.ok ? r.json() : Promise.reject(new Error('bad status'))))
+      .then((payload: RawTeam[] | { source?: string; teams?: RawTeam[] }) => {
         if (cancelled) return
-        const normalized = normalizeTeams(raw)
-        if (normalized.length >= 30) {
-          setTeams(normalized)
-          setDataSource('live')
-        } else {
+        // Accept both the legacy array shape and the { source, teams } shape.
+        const raw = Array.isArray(payload) ? payload : payload.teams
+        const source = Array.isArray(payload) ? 'live' : payload.source
+        if (!raw || raw.length < 30) {
           setDataSource('seed')
+          return
         }
+        setTeams(normalizeTeams(raw))
+        // Trust the server's honest source; only 'seed' means no live data.
+        setDataSource(source === 'seed' ? 'seed' : 'live')
       })
       .catch(() => {
         if (!cancelled) setDataSource('seed')

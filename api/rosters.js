@@ -99,21 +99,48 @@ async function fetchTeamRoster(code) {
   })
 }
 
-export default async function handler(_req, res) {
+export default async function handler(req, res) {
+  const errors = []
+  let liveCount = 0
+
   const teams = await Promise.all(
     SEED.map(async (seedTeam) => {
       try {
         const roster = await fetchTeamRoster(seedTeam.id)
         if (!roster.length) throw new Error('empty roster')
+        liveCount++
         return { ...seedTeam, roster }
-      } catch {
+      } catch (err) {
         // Team-level fallback: keep the bundled roster for this team.
+        errors.push(`${seedTeam.id}: ${err instanceof Error ? err.message : String(err)}`)
         return seedTeam
       }
     }),
   )
 
-  // Cache at the edge for an hour; serve stale while revalidating for a day.
-  res.setHeader('Cache-Control', 's-maxage=3600, stale-while-revalidate=86400')
-  res.status(200).json(teams)
+  const source = liveCount === 0 ? 'seed' : liveCount < SEED.length ? 'partial' : 'live'
+
+  // Only cache a genuinely-live response for long; if the feed is failing,
+  // cache briefly so we retry soon instead of serving stale seed for an hour.
+  res.setHeader(
+    'Cache-Control',
+    source === 'live' ? 's-maxage=3600, stale-while-revalidate=86400' : 's-maxage=60',
+  )
+
+  const meta = {
+    source,
+    liveCount,
+    total: SEED.length,
+    fetchedAt: new Date().toISOString(),
+    errors: errors.slice(0, 8),
+  }
+
+  // ?debug=1 returns just the diagnostics (small + easy to read/paste).
+  const debug = (req.query && (req.query.debug === '1' || req.query.debug === 'true'))
+  if (debug) {
+    res.status(200).json(meta)
+    return
+  }
+
+  res.status(200).json({ ...meta, teams })
 }
