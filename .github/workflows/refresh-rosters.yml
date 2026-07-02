@@ -24,14 +24,8 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 20
-      - name: Fetch rosters from the NHL feed
-        run: node scripts/fetch-rosters.mjs
-      - name: Fetch season stats from the NHL feed
-        run: node scripts/fetch-stats.mjs
-      - name: Fetch injuries from ESPN
-        run: node scripts/fetch-injuries.mjs
-      - name: Build free-agent list
-        run: node scripts/fetch-freeagents.mjs
+      - name: Refresh rosters, ratings, stats, injuries & free agents
+        run: node scripts/refresh-data.mjs
       - name: Commit refreshed rosters
         run: |
           if [[ -n "$(git status --porcelain)" ]]; then
