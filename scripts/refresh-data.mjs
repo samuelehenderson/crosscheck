@@ -116,7 +116,8 @@ function skaterRates(key) {
     wG = 0,
     wA = 0,
     wPM = 0,
-    wGP = 0
+    wGP = 0,
+    rawGP = 0
   skaterSeasons.forEach((m, i) => {
     const r = m.get(key)
     if (r && r.gp) {
@@ -126,47 +127,62 @@ function skaterRates(key) {
       wA += r.assists * w
       wPM += r.plusMinus * w
       wGP += r.gp * w
+      rawGP += r.gp
     }
   })
   if (!wGP) return null
   const per82 = (v) => (v / wGP) * 82
-  return { pp82: per82(wPts), g82: per82(wG), a82: per82(wA), pm82: per82(wPM) }
+  return { pp82: per82(wPts), g82: per82(wG), a82: per82(wA), pm82: per82(wPM), rawGP }
 }
 
-/** Full two-way component ratings for an uncurated skater. */
+/** Shrink a derived rating toward the baseline when the sample is small, so a
+ *  hot 10-game cameo can't out-rate an established star. */
+function shrink(value, baseline, rawGP, halfLife) {
+  const k = rawGP / (rawGP + halfLife)
+  return Math.round(baseline + (value - baseline) * k)
+}
+
+/** Full two-way component ratings for an uncurated skater. Ratings shrink
+ *  toward the baseline for small samples (half-strength at 40 career GP). */
 function deriveSkater(key, position) {
   const r = skaterRates(key)
   if (!r) return null
   const isD = position === 'LD' || position === 'RD'
+  const S = (v, base) => clamp(shrink(v, base, r.rawGP, 40), 45, 97)
   if (isD) {
-    const offense = clamp(Math.round(50 + r.pp82 * 0.62), 45, 95)
-    const finishing = clamp(Math.round(50 + r.g82 * 1.2 + r.pp82 * 0.1), 45, 90)
-    const defense = clamp(Math.round(70 + r.pm82 * 0.35), 50, 93)
+    const offense = S(50 + r.pp82 * 0.62, BASELINE.D.offense)
+    const finishing = S(50 + r.g82 * 1.2 + r.pp82 * 0.1, BASELINE.D.finishing)
+    const defense = S(70 + r.pm82 * 0.35, BASELINE.D.defense)
     const overall = clamp(Math.round(0.36 * offense + 0.1 * finishing + 0.54 * defense), 55, 95)
     return { overall, offense, defense, finishing, goaltending: null }
   }
-  const offense = clamp(Math.round(50 + r.pp82 * 0.5), 45, 97)
-  const finishing = clamp(Math.round(52 + r.g82 * 1.0 + r.a82 * 0.15), 45, 97)
-  const defense = clamp(Math.round(66 + r.pm82 * 0.3), 45, 92)
+  const offense = S(50 + r.pp82 * 0.5, BASELINE.F.offense)
+  const finishing = S(52 + r.g82 * 1.0 + r.a82 * 0.15, BASELINE.F.finishing)
+  const defense = S(66 + r.pm82 * 0.3, BASELINE.F.defense)
   const overall = clamp(Math.round(0.48 * offense + 0.24 * finishing + 0.28 * defense), 55, 96)
   return { overall, offense, defense, finishing, goaltending: null }
 }
 
-/** Rating for an uncurated goalie from recency+GP weighted save %. */
+/** Rating for an uncurated goalie from recency+GP weighted save %. Shrinks
+ *  toward the baseline for small samples (half-strength at 25 career GP) so a
+ *  hot backup stretch can't out-rate an established starter. */
 function deriveGoalie(key) {
   let wSv = 0,
-    wGP = 0
+    wGP = 0,
+    rawGP = 0
   goalieSeasons.forEach((m, i) => {
     const r = m.get(key)
     if (r && r.gp && r.svpct) {
       const w = RECENCY[i]
       wSv += r.svpct * r.gp * w
       wGP += r.gp * w
+      rawGP += r.gp
     }
   })
   if (!wGP) return null
   const sv = wSv / wGP
-  const g = clamp(Math.round(77 + (sv - 0.9) * 600), 55, 93)
+  const raw = 77 + (sv - 0.9) * 600
+  const g = clamp(shrink(raw, BASELINE.G.goaltending, rawGP, 25), 55, 93)
   return { overall: g, offense: null, defense: null, finishing: null, goaltending: g }
 }
 
