@@ -1,5 +1,6 @@
-// The main team view: projection header, roster board, and the ranks + trades
-// sidebar. Clicking a player opens the trade modal.
+// The main team view: projection header, roster board, and the ranks +
+// injuries + moves sidebar. Tapping a player opens their detail card, or the
+// trade flow when Trade mode is on.
 
 import { useMemo, useState } from 'react'
 import { Navigate, useParams } from 'react-router-dom'
@@ -11,14 +12,14 @@ import { RanksPanel } from '../components/RanksPanel'
 import { InjuriesPanel } from '../components/InjuriesPanel'
 import { TradePanel } from '../components/TradePanel'
 import { TradeModal } from '../components/TradeModal'
+import { PlayerDetailModal } from '../components/PlayerDetailModal'
 import { STATS_SEASON } from '../data'
 
 export function TeamPage() {
   const { teamId } = useParams<{ teamId: string }>()
   const store = useStore()
   const [tradingPlayer, setTradingPlayer] = useState<Player | null>(null)
-  const [simulating, setSimulating] = useState(false)
-  const [pulse, setPulse] = useState(0)
+  const [detailPlayer, setDetailPlayer] = useState<Player | null>(null)
 
   // The after-trade version of this team is what we display on the board.
   const team = useMemo(
@@ -37,19 +38,21 @@ export function TeamPage() {
     [store.baseTeams],
   )
 
+  // Players that are "new" on their team: traded in, or signed as free agents.
+  const newIds = useMemo(() => {
+    const s = new Set(store.signedIds)
+    store.originOf.forEach((_origin, id) => s.add(id))
+    return s
+  }, [store.originOf, store.signedIds])
+
   if (!team || !teamId) return <Navigate to="/" replace />
 
   const before = store.before.get(teamId)!
   const after = store.after.get(teamId)!
 
-  // "Run Simulation" is a deterministic recompute; we animate it so the button
-  // feels alive and re-renders the freshest numbers.
-  const runSimulation = () => {
-    setSimulating(true)
-    window.setTimeout(() => {
-      setSimulating(false)
-      setPulse((p) => p + 1)
-    }, 550)
+  const selectPlayer = (p: Player) => {
+    if (store.tradeMode) setTradingPlayer(p)
+    else setDetailPlayer(p)
   }
 
   const confirmTrade = (toTeamId: string) => {
@@ -63,15 +66,8 @@ export function TeamPage() {
   }
 
   return (
-    <div key={pulse} className="space-y-5">
-      <TeamHeader
-        team={team}
-        before={before}
-        after={after}
-        hasTrades={store.hasTrades}
-        onRunSimulation={runSimulation}
-        simulating={simulating}
-      />
+    <div className="space-y-5">
+      <TeamHeader team={team} before={before} after={after} hasTrades={store.hasTrades} />
 
       <div className="grid grid-cols-1 gap-5 xl:grid-cols-[1fr_320px]">
         <div className="rounded-2xl border border-rink-700 bg-rink-900/40 p-4 sm:p-5">
@@ -88,15 +84,11 @@ export function TeamPage() {
               {store.tradeMode ? '⇄ Trade mode: On' : '⇄ Trade'}
             </button>
           </div>
-          <RosterBoard
-            team={team}
-            originOf={store.originOf}
-            onTrade={store.tradeMode ? setTradingPlayer : undefined}
-          />
+          <RosterBoard team={team} newIds={newIds} onTrade={selectPlayer} />
           <p className="mt-4 text-center text-[11px] text-slate-600">
             {store.tradeMode
               ? 'Tap any player to move them to another team.'
-              : 'Tap “Trade” to start moving players.'}{' '}
+              : 'Tap a player for details, or “Trade” to start moving players.'}{' '}
             {STATS_SEASON ? `Stat lines are ${STATS_SEASON} totals. ` : ''}Ratings are estimates, not
             official.
           </p>
@@ -107,10 +99,13 @@ export function TeamPage() {
           <InjuriesPanel team={team} />
           <TradePanel
             assets={store.assets}
+            signings={store.signings}
             playerById={playerById}
             teamById={teamById}
             onRemove={store.removeAsset}
+            onRemoveSigning={store.removeSigning}
             onClear={store.clearTrades}
+            shareUrl={store.shareUrl}
           />
         </aside>
       </div>
@@ -122,6 +117,18 @@ export function TeamPage() {
           teams={store.baseTeams}
           onConfirm={confirmTrade}
           onClose={() => setTradingPlayer(null)}
+        />
+      )}
+
+      {detailPlayer && (
+        <PlayerDetailModal
+          player={detailPlayer}
+          team={team}
+          onTrade={(p) => {
+            setDetailPlayer(null)
+            setTradingPlayer(p)
+          }}
+          onClose={() => setDetailPlayer(null)}
         />
       )}
     </div>

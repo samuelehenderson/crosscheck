@@ -95,6 +95,14 @@ export interface Team {
   roster: Player[]
 }
 
+/** A pending free-agent signing: an unrostered player joining a team. */
+export interface Signing {
+  name: string
+  position: Position
+  overall: number
+  toTeamId: string
+}
+
 /** A pending trade: player ids moving between two teams. */
 export interface TradeAsset {
   playerId: string

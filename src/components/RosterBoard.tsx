@@ -6,7 +6,7 @@ import { PlayerCard } from './PlayerCard'
 
 interface Props {
   team: Team
-  originOf: Map<string, string>
+  newIds: Set<string>
   onTrade?: (player: Player) => void
 }
 
@@ -27,13 +27,13 @@ function Column({
   label,
   players,
   team,
-  originOf,
+  newIds,
   onTrade,
 }: {
   label: string
   players: Player[]
   team: Team
-  originOf: Map<string, string>
+  newIds: Set<string>
   onTrade?: (player: Player) => void
 }) {
   return (
@@ -47,7 +47,7 @@ function Column({
             key={p.id}
             player={p}
             team={team}
-            isNew={originOf.has(p.id)}
+            isNew={newIds.has(p.id)}
             onTrade={onTrade}
           />
         ))}
@@ -61,7 +61,7 @@ function Column({
   )
 }
 
-export function RosterBoard({ team, originOf, onTrade }: Props) {
+export function RosterBoard({ team, newIds, onTrade }: Props) {
   const byPosition = (pos: Position) =>
     team.roster
       .filter((p) => p.position === pos)
@@ -77,7 +77,7 @@ export function RosterBoard({ team, originOf, onTrade }: Props) {
               label={g.label}
               players={byPosition(g.key)}
               team={team}
-              originOf={originOf}
+              newIds={newIds}
               onTrade={onTrade}
             />
           ))}

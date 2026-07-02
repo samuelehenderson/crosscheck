@@ -10,15 +10,22 @@ foundation you can keep building on.
 ## Features
 
 - **All 32 teams**, grouped by division, each with a full roster laid out by
-  position (LW / C / RW / LD / RD / G).
+  position (LW / C / RW / LD / RD / G), live season stat lines, and injuries.
 - **Projections** — projected points, playoff odds, Stanley Cup odds, and
-  draft-lottery odds, derived from player ratings by a transparent, tunable
-  simulation engine (`src/sim/engine.ts`).
-- **Trade machine** — click any player to send them to another team. The
-  before/after columns, roster ranks, and league power rankings all recompute
-  instantly. Trades persist across refreshes.
-- **Power Rankings** — a sortable league-wide table of every team by projected
-  strength, including pending trades.
+  draft-lottery odds from a transparent, tunable engine (`src/sim/engine.ts`),
+  plus a **Monte Carlo simulator** (`src/sim/monteCarlo.ts`) that plays out 500
+  seasons behind the "Run Simulation" button.
+- **Trade machine** — flip on Trade mode and move any player; tap a player
+  normally for their detail card (ratings breakdown, stats, injury).
+- **Signable free agents** — a live list of unrostered players; sign one to any
+  team and the projections move just like trades.
+- **Shareable scenarios** — the Share button encodes your trades + signings
+  into a URL anyone can open.
+- **Power Rankings, League Leaders, player search** across rostered players
+  and free agents.
+- **Ratings** — hand-curated for established stars, otherwise derived from a
+  3-year recency-weighted two-way stat model (production → offense/finishing,
+  plus/minus → defense, save % for goalies).
 
 ## Tech
 

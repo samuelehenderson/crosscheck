@@ -8,6 +8,7 @@ import { PlayerSearch } from './components/PlayerSearch'
 import { TeamPage } from './pages/TeamPage'
 import { LeaguePage } from './pages/LeaguePage'
 import { FreeAgentsPage } from './pages/FreeAgentsPage'
+import { LeadersPage } from './pages/LeadersPage'
 
 function BrandMark() {
   // Crossed hockey sticks over a puck — reads as a hockey emblem, not an "×".
@@ -40,12 +41,18 @@ function Brand() {
   )
 }
 
+function relTime(date: Date): string {
+  const mins = Math.max(1, Math.round((Date.now() - date.getTime()) / 60000))
+  if (mins < 60) return `${mins}m ago`
+  const hours = Math.round(mins / 60)
+  if (hours < 48) return `${hours}h ago`
+  return `${Math.round(hours / 24)}d ago`
+}
+
 function DataSourceBadge() {
   const { updatedAt } = useStore()
   const date = new Date(updatedAt)
-  const label = Number.isNaN(date.getTime())
-    ? 'Rosters loaded'
-    : `Rosters ${date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}`
+  const label = Number.isNaN(date.getTime()) ? 'Rosters loaded' : `Rosters · ${relTime(date)}`
   return (
     <span
       title={`Rosters last refreshed from the NHL feed on ${date.toLocaleString()}`}
@@ -58,15 +65,16 @@ function DataSourceBadge() {
 }
 
 function TradeCountPill() {
-  const { assets, clearTrades } = useStore()
-  if (assets.length === 0) return null
+  const { assets, signings, clearTrades } = useStore()
+  const total = assets.length + signings.length
+  if (total === 0) return null
   return (
     <button
       onClick={clearTrades}
       className="rounded-full bg-ice-400/15 px-3 py-1 text-xs font-semibold text-ice-300 ring-1 ring-ice-400/30 transition hover:bg-ice-400/25"
-      title="Clear all trades"
+      title="Clear all trades and signings"
     >
-      {assets.length} trade{assets.length === 1 ? '' : 's'} · clear
+      {total} move{total === 1 ? '' : 's'} · clear
     </button>
   )
 }
@@ -99,6 +107,12 @@ function Shell() {
               className="rounded-lg px-3 py-1.5 text-sm font-medium text-slate-300 transition hover:bg-rink-850 hover:text-white"
             >
               Free Agents
+            </Link>
+            <Link
+              to="/leaders"
+              className="rounded-lg px-3 py-1.5 text-sm font-medium text-slate-300 transition hover:bg-rink-850 hover:text-white"
+            >
+              Leaders
             </Link>
           </nav>
           <div className="ml-auto flex items-center gap-3">
@@ -142,6 +156,17 @@ function Shell() {
               >
                 Free Agents
               </NavLink>
+              <NavLink
+                to="/leaders"
+                onClick={() => setMobileOpen(false)}
+                className={({ isActive }) =>
+                  `rounded-lg px-3 py-2 text-sm font-semibold transition ${
+                    isActive ? 'bg-rink-800 text-white' : 'text-slate-300 hover:bg-rink-850'
+                  }`
+                }
+              >
+                League Leaders
+              </NavLink>
               <div className="mt-2 px-1 text-[10px] font-semibold uppercase tracking-widest text-slate-600">
                 Teams
               </div>
@@ -157,6 +182,7 @@ function Shell() {
             <Route path="/team/:teamId" element={<TeamPage />} />
             <Route path="/league" element={<LeaguePage />} />
             <Route path="/free-agents" element={<FreeAgentsPage />} />
+            <Route path="/leaders" element={<LeadersPage />} />
             <Route path="*" element={<Navigate to="/team/FLA" replace />} />
           </Routes>
         </main>

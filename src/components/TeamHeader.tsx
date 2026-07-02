@@ -1,18 +1,20 @@
-// The top projection card: crest, big projected-points number, and the
-// before → after → change table for the four headline metrics.
+// The top projection card: crest, big projected-points number, the
+// before → after → change table for the four headline metrics, and the
+// Monte Carlo "Run Simulation" flow.
 
+import { useEffect, useState } from 'react'
 import type { Team, TeamProjection } from '../types'
 import { TeamBadge } from './TeamBadge'
 import { Arrow, DeltaBadge, ValuePill } from './ui'
 import { delta, pct, points } from '../lib/format'
+import { simulateSeasons, type SimSummary } from '../sim/monteCarlo'
+import { useStore } from '../store'
 
 interface Props {
   team: Team
   before: TeamProjection
   after: TeamProjection
   hasTrades: boolean
-  onRunSimulation: () => void
-  simulating: boolean
 }
 
 interface Row {
@@ -24,7 +26,22 @@ interface Row {
   invert?: boolean
 }
 
-export function TeamHeader({ team, before, after, hasTrades, onRunSimulation, simulating }: Props) {
+export function TeamHeader({ team, before, after, hasTrades }: Props) {
+  const store = useStore()
+  const [simulating, setSimulating] = useState(false)
+  const [sim, setSim] = useState<SimSummary | null>(null)
+
+  // A new scenario or team invalidates previous simulation results.
+  useEffect(() => setSim(null), [team.id, store.assets, store.signings])
+
+  const runSimulation = () => {
+    setSimulating(true)
+    // Yield a frame so the button state paints before the number crunching.
+    window.setTimeout(() => {
+      setSim(simulateSeasons(store.afterTeams, store.after, team.id, 500))
+      setSimulating(false)
+    }, 60)
+  }
   const rows: Row[] = [
     { label: 'Projected Points', before: before.points, after: after.points, fmt: points },
     { label: 'Playoff Odds', before: before.playoffOdds, after: after.playoffOdds, fmt: pct },
@@ -108,17 +125,42 @@ export function TeamHeader({ team, before, after, hasTrades, onRunSimulation, si
             })}
           </div>
 
-          <div className="mt-4 flex justify-end">
+          <div className="mt-4 flex items-center justify-end gap-3">
+            {sim && (
+              <span className="hidden text-[11px] text-slate-500 sm:block">
+                {sim.sims} seasons simulated
+              </span>
+            )}
             <button
-              onClick={onRunSimulation}
+              onClick={runSimulation}
               disabled={simulating}
               className="rounded-lg bg-ice-400 px-4 py-2 text-sm font-semibold text-rink-950 shadow transition hover:bg-ice-300 disabled:opacity-60"
             >
-              {simulating ? 'Simulating…' : 'Run Simulation'}
+              {simulating ? 'Simulating…' : sim ? 'Re-run Simulation' : 'Run Simulation'}
             </button>
           </div>
         </div>
       </div>
+
+      {/* Monte Carlo results strip */}
+      {sim && (
+        <div className="mt-5 grid grid-cols-2 gap-2 rounded-xl border border-ice-400/20 bg-rink-900/60 p-3 sm:grid-cols-4">
+          <SimStat label="Avg points" value={sim.avgPoints.toFixed(1)} sub={`${sim.pointsLow}–${sim.pointsHigh} range`} />
+          <SimStat label="Made playoffs" value={`${sim.playoffPct}%`} />
+          <SimStat label="Won the Cup" value={`${sim.cupPct}%`} />
+          <SimStat label="Won 1st pick" value={`${sim.draftFirstPct}%`} />
+        </div>
+      )}
+    </div>
+  )
+}
+
+function SimStat({ label, value, sub }: { label: string; value: string; sub?: string }) {
+  return (
+    <div className="text-center">
+      <div className="text-lg font-black tabular-nums text-ice-300">{value}</div>
+      <div className="text-[10px] uppercase tracking-wider text-slate-500">{label}</div>
+      {sub && <div className="text-[10px] tabular-nums text-slate-600">{sub}</div>}
     </div>
   )
 }

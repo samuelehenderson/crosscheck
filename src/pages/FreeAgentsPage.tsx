@@ -1,12 +1,17 @@
 // Free agents: players who played last season but aren't on any current NHL
-// roster. Two sortable tables (skaters, goalies), fed by the scheduled Action.
+// roster. Sortable tables (skaters with position filters, goalies), each row
+// signable to a team — signings join that team's roster and move the
+// projections just like trades.
 
 import { useMemo, useState } from 'react'
 import { FREE_AGENTS } from '../data'
+import { useStore } from '../store'
 import type { FreeAgent } from '../types'
 import { initials } from '../lib/format'
+import { TeamPickModal } from '../components/TeamPickModal'
 
 type SkaterKey = 'points' | 'goals' | 'assists' | 'gamesPlayed' | 'overall'
+type PosFilter = 'ALL' | 'C' | 'LW' | 'RW' | 'D'
 
 function posLabel(p: FreeAgent['position']): string {
   if (p === 'LD' || p === 'RD') return 'D'
@@ -21,7 +26,18 @@ function Avatar({ name }: { name: string }) {
   )
 }
 
-function SkaterTable({ skaters }: { skaters: FreeAgent[] }) {
+function SignButton({ onClick }: { onClick: () => void }) {
+  return (
+    <button
+      onClick={onClick}
+      className="rounded-md bg-up/15 px-2.5 py-1 text-xs font-semibold text-up ring-1 ring-up/30 transition hover:bg-up/25"
+    >
+      Sign
+    </button>
+  )
+}
+
+function SkaterTable({ skaters, onSign }: { skaters: FreeAgent[]; onSign: (fa: FreeAgent) => void }) {
   const [sort, setSort] = useState<SkaterKey>('points')
   const rows = useMemo(
     () => [...skaters].sort((a, b) => ((b[sort] as number) ?? 0) - ((a[sort] as number) ?? 0)),
@@ -36,7 +52,7 @@ function SkaterTable({ skaters }: { skaters: FreeAgent[] }) {
   ]
   return (
     <div className="overflow-x-auto rounded-2xl border border-rink-700">
-      <table className="w-full min-w-[600px] border-collapse text-sm">
+      <table className="w-full min-w-[660px] border-collapse text-sm">
         <thead>
           <tr className="bg-rink-850 text-left text-[11px] uppercase tracking-wider text-slate-500">
             <th className="px-3 py-2.5 font-semibold">#</th>
@@ -53,6 +69,7 @@ function SkaterTable({ skaters }: { skaters: FreeAgent[] }) {
                 </button>
               </th>
             ))}
+            <th className="px-3 py-2.5" />
           </tr>
         </thead>
         <tbody>
@@ -76,6 +93,9 @@ function SkaterTable({ skaters }: { skaters: FreeAgent[] }) {
                   {p[c.key] as number}
                 </td>
               ))}
+              <td className="px-3 py-2 text-right">
+                <SignButton onClick={() => onSign(p)} />
+              </td>
             </tr>
           ))}
         </tbody>
@@ -84,10 +104,10 @@ function SkaterTable({ skaters }: { skaters: FreeAgent[] }) {
   )
 }
 
-function GoalieTable({ goalies }: { goalies: FreeAgent[] }) {
+function GoalieTable({ goalies, onSign }: { goalies: FreeAgent[]; onSign: (fa: FreeAgent) => void }) {
   return (
     <div className="overflow-x-auto rounded-2xl border border-rink-700">
-      <table className="w-full min-w-[560px] border-collapse text-sm">
+      <table className="w-full min-w-[620px] border-collapse text-sm">
         <thead>
           <tr className="bg-rink-850 text-left text-[11px] uppercase tracking-wider text-slate-500">
             <th className="px-3 py-2.5 font-semibold">#</th>
@@ -97,6 +117,7 @@ function GoalieTable({ goalies }: { goalies: FreeAgent[] }) {
             <th className="px-3 py-2.5 text-right font-semibold">SV%</th>
             <th className="px-3 py-2.5 text-right font-semibold">GAA</th>
             <th className="px-3 py-2.5 text-right font-semibold">OVR</th>
+            <th className="px-3 py-2.5" />
           </tr>
         </thead>
         <tbody>
@@ -120,6 +141,9 @@ function GoalieTable({ goalies }: { goalies: FreeAgent[] }) {
                 {g.gaa != null ? g.gaa.toFixed(2) : '—'}
               </td>
               <td className="px-3 py-2 text-right tabular-nums text-slate-300">{g.overall}</td>
+              <td className="px-3 py-2 text-right">
+                <SignButton onClick={() => onSign(g)} />
+              </td>
             </tr>
           ))}
         </tbody>
@@ -128,9 +152,39 @@ function GoalieTable({ goalies }: { goalies: FreeAgent[] }) {
   )
 }
 
+const POS_FILTERS: PosFilter[] = ['ALL', 'C', 'LW', 'RW', 'D']
+
 export function FreeAgentsPage() {
-  const { skaters, goalies, season } = FREE_AGENTS
-  const empty = skaters.length === 0 && goalies.length === 0
+  const store = useStore()
+  const [signing, setSigning] = useState<FreeAgent | null>(null)
+  const [posFilter, setPosFilter] = useState<PosFilter>('ALL')
+  const { season } = FREE_AGENTS
+
+  // Hide anyone already signed in the current scenario.
+  const skaters = useMemo(
+    () =>
+      FREE_AGENTS.skaters
+        .filter((p) => !store.signedNames.has(p.name))
+        .filter((p) => posFilter === 'ALL' || posLabel(p.position) === posFilter),
+    [store.signedNames, posFilter],
+  )
+  const goalies = useMemo(
+    () => FREE_AGENTS.goalies.filter((g) => !store.signedNames.has(g.name)),
+    [store.signedNames],
+  )
+
+  const confirmSign = (teamId: string) => {
+    if (!signing) return
+    store.addSigning({
+      name: signing.name,
+      position: signing.position,
+      overall: signing.overall,
+      toTeamId: teamId,
+    })
+    setSigning(null)
+  }
+
+  const empty = FREE_AGENTS.skaters.length === 0 && FREE_AGENTS.goalies.length === 0
 
   return (
     <div className="space-y-5">
@@ -138,7 +192,8 @@ export function FreeAgentsPage() {
         <h1 className="text-2xl font-black text-white">Free Agents</h1>
         <p className="text-sm text-slate-400">
           Players who logged NHL time in {season || 'the last season'} but aren't on any current
-          roster.
+          roster. Tap <span className="font-semibold text-up">Sign</span> to add one to a team and
+          watch the projections move.
         </p>
         <p className="mt-1 text-[11px] text-slate-600 sm:hidden">Swipe the table sideways to see all columns →</p>
       </div>
@@ -149,13 +204,30 @@ export function FreeAgentsPage() {
         </div>
       ) : (
         <>
-          <SkaterTable skaters={skaters} />
+          <div className="flex flex-wrap items-center gap-1.5">
+            {POS_FILTERS.map((f) => (
+              <button
+                key={f}
+                onClick={() => setPosFilter(f)}
+                className={`rounded-full px-3 py-1 text-xs font-semibold transition ${
+                  posFilter === f
+                    ? 'bg-ice-400 text-rink-950'
+                    : 'bg-rink-850 text-slate-400 ring-1 ring-rink-700 hover:text-slate-200'
+                }`}
+              >
+                {f === 'ALL' ? 'All skaters' : f}
+              </button>
+            ))}
+          </div>
+
+          <SkaterTable skaters={skaters} onSign={setSigning} />
+
           {goalies.length > 0 && (
             <div className="space-y-2">
               <h2 className="text-sm font-semibold uppercase tracking-widest text-slate-500">
                 Goalies
               </h2>
-              <GoalieTable goalies={goalies} />
+              <GoalieTable goalies={goalies} onSign={setSigning} />
             </div>
           )}
           <p className="text-center text-[11px] text-slate-600">
@@ -164,6 +236,16 @@ export function FreeAgentsPage() {
             recency-weighted average of production; the stat columns show last season's totals.
           </p>
         </>
+      )}
+
+      {signing && (
+        <TeamPickModal
+          title={`Sign ${signing.name}`}
+          subtitle={`${posLabel(signing.position)} · ${signing.overall} OVR — choose a team`}
+          teams={store.baseTeams}
+          onPick={confirmSign}
+          onClose={() => setSigning(null)}
+        />
       )}
     </div>
   )

@@ -41,6 +41,14 @@ export function nameKey(name: string): string {
   return name.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[^a-z0-9]/g, '')
 }
 
+/** Season stats / injury lookup by display name (for signed free agents). */
+export function getStats(name: string): PlayerStats | null {
+  return STATS[nameKey(name)] ?? null
+}
+export function getInjury(name: string): Injury | null {
+  return INJURIES[nameKey(name)] ?? null
+}
+
 export interface RawPlayer {
   name: string
   position: string

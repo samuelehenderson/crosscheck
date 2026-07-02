@@ -24,7 +24,7 @@ interface Hit {
 }
 
 export function PlayerSearch() {
-  const { baseTeams, afterTeams, originOf } = useStore()
+  const { baseTeams, afterTeams, originOf, signedNames } = useStore()
   const navigate = useNavigate()
   const [query, setQuery] = useState('')
   const [open, setOpen] = useState(false)
@@ -53,15 +53,18 @@ export function PlayerSearch() {
         }
       }),
     )
-    const freeAgents: Hit[] = [...FREE_AGENTS.skaters, ...FREE_AGENTS.goalies].map((fa) => ({
-      key: `fa-${fa.name}`,
-      name: fa.name,
-      position: fa.position,
-      overall: fa.overall,
-      navTo: '/free-agents',
-    }))
+    // Signed free agents already appear as rostered players above.
+    const freeAgents: Hit[] = [...FREE_AGENTS.skaters, ...FREE_AGENTS.goalies]
+      .filter((fa) => !signedNames.has(fa.name))
+      .map((fa) => ({
+        key: `fa-${fa.name}`,
+        name: fa.name,
+        position: fa.position,
+        overall: fa.overall,
+        navTo: '/free-agents',
+      }))
     return [...rostered, ...freeAgents]
-  }, [baseTeams, afterTeams, originOf])
+  }, [baseTeams, afterTeams, originOf, signedNames])
 
   const results = useMemo<Hit[]>(() => {
     const s = query.trim().toLowerCase()
