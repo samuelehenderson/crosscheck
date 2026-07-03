@@ -5,6 +5,7 @@ import { Link, NavLink, Navigate, Route, Routes } from 'react-router-dom'
 import { StoreProvider, useStore } from './store'
 import { TeamList } from './components/TeamList'
 import { PlayerSearch } from './components/PlayerSearch'
+import { RefreshButton } from './components/RefreshButton'
 import { TeamPage } from './pages/TeamPage'
 import { LeaguePage } from './pages/LeaguePage'
 import { FreeAgentsPage } from './pages/FreeAgentsPage'
@@ -41,28 +42,6 @@ function Brand() {
   )
 }
 
-function relTime(date: Date): string {
-  const mins = Math.max(1, Math.round((Date.now() - date.getTime()) / 60000))
-  if (mins < 60) return `${mins}m ago`
-  const hours = Math.round(mins / 60)
-  if (hours < 48) return `${hours}h ago`
-  return `${Math.round(hours / 24)}d ago`
-}
-
-function DataSourceBadge() {
-  const { updatedAt } = useStore()
-  const date = new Date(updatedAt)
-  const label = Number.isNaN(date.getTime()) ? 'Rosters loaded' : `Rosters · ${relTime(date)}`
-  return (
-    <span
-      title={`Rosters last refreshed from the NHL feed on ${date.toLocaleString()}`}
-      className="hidden items-center gap-1.5 rounded-full bg-rink-850 px-2.5 py-1 text-[11px] font-medium text-slate-400 ring-1 ring-rink-700 md:inline-flex"
-    >
-      <span className="h-1.5 w-1.5 rounded-full bg-up" />
-      {label}
-    </span>
-  )
-}
 
 function TradeCountPill() {
   const { assets, signings, clearTrades } = useStore()
@@ -116,7 +95,7 @@ function Shell() {
             </Link>
           </nav>
           <div className="ml-auto flex items-center gap-3">
-            <DataSourceBadge />
+            <RefreshButton />
             <PlayerSearch />
             <TradeCountPill />
           </div>

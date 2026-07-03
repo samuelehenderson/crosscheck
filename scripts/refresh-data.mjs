@@ -435,8 +435,8 @@ if (skaterSeasons.length > 0) {
 // 7. Timestamp.
 // ---------------------------------------------------------------------------
 
-writeFileSync(
-  dataUrl('updatedAt.json'),
-  JSON.stringify({ updatedAt: now.toISOString() }, null, 2) + '\n',
-)
+const stamp = JSON.stringify({ updatedAt: now.toISOString() }, null, 2) + '\n'
+writeFileSync(dataUrl('updatedAt.json'), stamp)
+// Also served statically so the in-app Refresh button can detect new deploys.
+writeFileSync(new URL('../public/updatedAt.json', import.meta.url), stamp)
 console.log('Refresh complete.')
