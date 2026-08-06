@@ -78,3 +78,11 @@ the "Refresh rosters" workflow from the GitHub Actions tab.
 - Real player headshots / official logos (currently stylized crests)
 - Save & share trade scenarios via URL
 - A full Monte-Carlo season simulator behind "Run Simulation"
+
+## License & data notes
+
+MIT licensed — take it, remix it, build on it. Roster/stat/injury data comes
+from the NHL's and ESPN's public feeds at refresh time; team names and logos
+are trademarks of the NHL and its member clubs (displayed from the league's own
+assets — swap them out if you use this commercially). Player ratings are this
+project's own estimates and are not official.
