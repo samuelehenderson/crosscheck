@@ -41,3 +41,20 @@ jobs:
           else
             echo "No roster changes to commit."
           fi
+      - name: Trigger Vercel deploy hook (if configured)
+        env:
+          HOOK: ${{ secrets.VERCEL_DEPLOY_HOOK }}
+        run: |
+          if [ -z "$HOOK" ]; then
+            echo "No VERCEL_DEPLOY_HOOK secret set — relying on Vercel's Git integration."
+            exit 0
+          fi
+          code=$(curl -sS -o /tmp/hook.out -w "%{http_code}" --max-time 20 -X POST "$HOOK" || echo "000")
+          echo "Deploy hook responded HTTP $code"
+          if grep -q '"job"' /tmp/hook.out 2>/dev/null; then
+            echo "Vercel accepted the deploy request — a fresh build is starting."
+          else
+            echo "WARNING: response did not look like a Vercel deploy-hook payload."
+            echo "The secret should be the Deploy Hook URL from Vercel → Settings → Git → Deploy Hooks"
+            echo "(it starts with https://api.vercel.com/v1/integrations/deploy/...), not the site URL."
+          fi
