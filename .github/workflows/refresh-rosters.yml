@@ -29,8 +29,11 @@ jobs:
       - name: Commit refreshed rosters
         run: |
           if [[ -n "$(git status --porcelain)" ]]; then
-            git config user.name "crosscheck-bot"
-            git config user.email "actions@users.noreply.github.com"
+            # Author as the repo owner (their GitHub noreply address) so Vercel
+            # attributes the commit to the connected account — commits from an
+            # unrecognized bot author get "Blocked" and never deploy.
+            git config user.name "samuelehenderson"
+            git config user.email "268289926+samuelehenderson@users.noreply.github.com"
             git add src/data/*.json public/updatedAt.json
             git commit -m "chore: refresh rosters, stats, injuries & free agents"
             git push
