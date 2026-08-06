@@ -1,0 +1,21 @@
+name: Site check
+
+# Manual diagnostic: reports what data timestamp the live site is serving,
+# so we can tell whether Vercel deployments are keeping up with main.
+
+on:
+  workflow_dispatch:
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Compare live site vs repo
+        run: |
+          echo "== live /updatedAt.json =="
+          curl -sS --max-time 20 "https://crosscheck-dusky.vercel.app/updatedAt.json?cb=$(date +%s)" || echo "FETCH FAILED"
+          echo ""
+          echo "== live homepage HTTP status =="
+          curl -sS -o /dev/null -w "%{http_code}\n" --max-time 20 "https://crosscheck-dusky.vercel.app/"
+          echo "== repo main updatedAt =="
+          curl -sS --max-time 20 "https://raw.githubusercontent.com/${{ github.repository }}/main/public/updatedAt.json" || echo "RAW FETCH FAILED"
