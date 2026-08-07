@@ -542,20 +542,30 @@ if (skaterSeasons.length > 0) {
             }
           })()
         : null
-      const next = games
-        .filter((g) => g.startTimeUTC && new Date(g.startTimeUTC).getTime() > now.getTime())
-        .slice(0, 5)
+      // The full season, played games included (with scores) so the panel can
+      // show the whole slate and fill in results as they happen.
+      const all = games
+        .filter((g) => g.startTimeUTC)
         .map((g) => {
           const home = g.homeTeam?.abbrev === t.id
-          return {
+          const us = home ? g.homeTeam : g.awayTeam
+          const them = home ? g.awayTeam : g.homeTeam
+          const done = g.gameState === 'OFF' || g.gameState === 'FINAL'
+          const entry = {
             date: g.gameDate ?? null,
             startUtc: g.startTimeUTC,
-            opp: home ? (g.awayTeam?.abbrev ?? null) : (g.homeTeam?.abbrev ?? null),
+            opp: them?.abbrev ?? null,
             home,
             type: g.gameType ?? 2,
           }
+          if (done && us?.score != null && them?.score != null) {
+            entry.usScore = us.score
+            entry.oppScore = them.score
+            entry.endType = g.gameOutcome?.lastPeriodType ?? 'REG'
+          }
+          return entry
         })
-      outTeams[t.id] = { last, next }
+      outTeams[t.id] = { last, games: all }
       schedOk++
     } catch (e) {
       console.log(`Schedule ${t.id} unavailable (${e.message}); continuing.`)

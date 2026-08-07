@@ -77,24 +77,38 @@ export interface LastResult {
   endType: string
 }
 
-/** An upcoming game on a team's schedule. */
-export interface UpcomingGame {
+/** A game on a team's schedule; score fields appear once it's been played. */
+export interface ScheduleGame {
   date: string | null
   startUtc: string
   opp: string | null
   home: boolean
   /** 1 preseason, 2 regular season, 3 playoffs. */
   type: number
+  usScore?: number
+  oppScore?: number
+  /** REG | OT | SO */
+  endType?: string
+}
+
+interface TeamSchedule {
+  last: LastResult | null
+  /** Full season (newer data). */
+  games?: ScheduleGame[]
+  /** Next-five list from the older pipeline shape; fallback only. */
+  next?: ScheduleGame[]
 }
 
 export const SCHEDULES = schedulesData as {
   season: string
   updatedAt: string
-  teams: Record<string, { last: LastResult | null; next: UpcomingGame[] }>
+  teams: Record<string, TeamSchedule>
 }
 
-export function getScheduleFor(teamId: string): { last: LastResult | null; next: UpcomingGame[] } {
-  return SCHEDULES.teams[teamId] ?? { last: null, next: [] }
+/** A team's schedule: the full season when available, else the next few. */
+export function getScheduleFor(teamId: string): { last: LastResult | null; games: ScheduleGame[] } {
+  const t = SCHEDULES.teams[teamId]
+  return { last: t?.last ?? null, games: t?.games ?? t?.next ?? [] }
 }
 
 /** NHL insider tweets fetched by the wire pipeline (empty until the
