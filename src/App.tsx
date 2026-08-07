@@ -10,6 +10,7 @@ import { TeamPage } from './pages/TeamPage'
 import { LeaguePage } from './pages/LeaguePage'
 import { FreeAgentsPage } from './pages/FreeAgentsPage'
 import { LeadersPage } from './pages/LeadersPage'
+import { MediaPage } from './pages/MediaPage'
 
 function BrandMark() {
   // Crossed hockey sticks over a puck — reads as a hockey emblem, not an "×".
@@ -93,6 +94,12 @@ function Shell() {
             >
               Leaders
             </Link>
+            <Link
+              to="/media"
+              className="rounded-lg px-3 py-1.5 text-sm font-medium text-slate-300 transition hover:bg-rink-850 hover:text-white"
+            >
+              Media
+            </Link>
           </nav>
           <div className="ml-auto flex items-center gap-3">
             <RefreshButton />
@@ -146,6 +153,17 @@ function Shell() {
               >
                 League Leaders
               </NavLink>
+              <NavLink
+                to="/media"
+                onClick={() => setMobileOpen(false)}
+                className={({ isActive }) =>
+                  `rounded-lg px-3 py-2 text-sm font-semibold transition ${
+                    isActive ? 'bg-rink-800 text-white' : 'text-slate-300 hover:bg-rink-850'
+                  }`
+                }
+              >
+                Media
+              </NavLink>
               <div className="mt-2 px-1 text-[10px] font-semibold uppercase tracking-widest text-slate-600">
                 Teams
               </div>
@@ -162,6 +180,7 @@ function Shell() {
             <Route path="/league" element={<LeaguePage />} />
             <Route path="/free-agents" element={<FreeAgentsPage />} />
             <Route path="/leaders" element={<LeadersPage />} />
+            <Route path="/media" element={<MediaPage />} />
             <Route path="*" element={<Navigate to="/team/FLA" replace />} />
           </Routes>
         </main>

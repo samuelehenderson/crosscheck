@@ -1,0 +1,82 @@
+{
+  "brand": "CrossCheck Media",
+  "tagline": "Creator-powered hockey coverage — concept demo",
+  "items": [
+    {
+      "id": "weekly-cap-corner-1",
+      "type": "article",
+      "title": "Cap Corner: The Contracts That Quietly Won July",
+      "summary": "Everyone graded the big swings. The real value was in the third-pair deals nobody tweeted about.",
+      "body": [
+        "Free agency grades always chase the headliners, but championship rosters are built in the margins. This week we look at three under-the-radar signings that project as the best dollar-per-win bets of the summer.",
+        "The pattern is the same every year: teams that pay for last season's box score overpay, and teams that pay for usage — minutes, matchups, zone starts — find the bargains. Two of our three picks were third-pair defensemen a month ago. By December, we think they're playing top-four minutes.",
+        "This is a weekly column. Every Friday we break down one cap situation, one contract, and one move we'd make if we ran the room."
+      ],
+      "creator": { "name": "Cap Corner", "handle": "@capcorner" },
+      "tags": ["salary cap", "free agency", "weekly column"],
+      "publishedAt": "2026-08-01",
+      "readMinutes": 6,
+      "featured": true
+    },
+    {
+      "id": "goalie-report-atlantic",
+      "type": "report",
+      "title": "Atlantic Goaltending Report: Post-Free-Agency Depth Charts",
+      "summary": "Every Atlantic crease ranked after the July shuffle — starters, backups, and the prospects knocking.",
+      "body": [
+        "The Atlantic rewrote its goaltending map in one week. This report ranks all eight creases by projected save value, with depth charts and the key camp battles to watch.",
+        "Methodology: three-year weighted save percentage, adjusted for workload and team defensive context. Full table and tiers inside."
+      ],
+      "creator": { "name": "Crease Notes", "handle": "@creasenotes" },
+      "tags": ["goaltending", "atlantic", "report"],
+      "publishedAt": "2026-07-28",
+      "readMinutes": 9
+    },
+    {
+      "id": "trade-tree-graphic",
+      "type": "graphic",
+      "title": "Trade Tree: How One 2022 Deadline Deal Became Three Roster Players",
+      "summary": "A full-bleed visual tracing every branch of the deal — picks, swaps, and the players they turned into.",
+      "creator": { "name": "Sticks & Stats", "handle": "@sticksandstats" },
+      "tags": ["trade tree", "infographic"],
+      "publishedAt": "2026-07-30"
+    },
+    {
+      "id": "prospect-rankings-summer",
+      "type": "article",
+      "title": "Summer Top 50: Prospect Rankings After Development Camps",
+      "summary": "Risers, fallers, and the late-round picks turning heads — our consensus board from four scouts.",
+      "body": [
+        "Development camps don't decide careers, but they move needles. After collecting notes from four scouts across three camps, our summer board has a new top five and some aggressive risers.",
+        "The theme this year: skating floors are rising league-wide, and the separators are processing speed and pace under pressure. The prospects who climbed our board all share one trait — they make their first read before the puck arrives."
+      ],
+      "creator": { "name": "Northern Lights Scouting", "handle": "@nl_scouting" },
+      "tags": ["prospects", "rankings"],
+      "publishedAt": "2026-07-25",
+      "readMinutes": 12
+    },
+    {
+      "id": "division-preview-graphic",
+      "type": "graphic",
+      "title": "One Chart: Projected Points vs. Cap Committed, All 32 Teams",
+      "summary": "The efficiency quadrant every GM gets judged by — who's buying wins and who's printing them.",
+      "creator": { "name": "Sticks & Stats", "handle": "@sticksandstats" },
+      "tags": ["analytics", "infographic"],
+      "publishedAt": "2026-07-22"
+    },
+    {
+      "id": "weekly-mailbag-1",
+      "type": "article",
+      "title": "Mailbag: Your Offseason Overreactions, Sorted",
+      "summary": "Which July panic is real and which is noise — we answer the five best reader questions of the week.",
+      "body": [
+        "Every offseason produces the same debate: is the roster actually worse, or does it just feel worse because the moves happened to someone else's favorite team? This week's mailbag sorts five reader takes into 'real concern' and 'August boredom.'",
+        "Want your question in next week's edition? Reply to any of our posts and tag it #mailbag."
+      ],
+      "creator": { "name": "Between the Benches", "handle": "@btbenches" },
+      "tags": ["mailbag", "weekly column"],
+      "publishedAt": "2026-07-19",
+      "readMinutes": 7
+    }
+  ]
+}
