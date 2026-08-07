@@ -9,6 +9,7 @@ import { useStore } from '../store'
 import { TeamHeader } from '../components/TeamHeader'
 import { RosterBoard } from '../components/RosterBoard'
 import { RanksPanel } from '../components/RanksPanel'
+import { GameDayCard } from '../components/GameDayCard'
 import { InjuriesPanel } from '../components/InjuriesPanel'
 import { TradePanel } from '../components/TradePanel'
 import { TradeModal } from '../components/TradeModal'
@@ -95,6 +96,7 @@ export function TeamPage() {
         </div>
 
         <aside className="space-y-4">
+          <GameDayCard team={team} />
           <RanksPanel before={before} after={after} hasTrades={store.hasTrades} />
           <InjuriesPanel team={team} />
           <TradePanel

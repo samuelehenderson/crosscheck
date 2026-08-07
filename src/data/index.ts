@@ -16,6 +16,7 @@ import updated from './updatedAt.json'
 import statsData from './stats.json'
 import injuriesData from './injuries.json'
 import freeAgentsData from './freeAgents.json'
+import gamedayData from './gameday.json'
 
 /** When the bundled rosters were last refreshed from the NHL feed (ISO). */
 export const UPDATED_AT: string = (updated as { updatedAt: string }).updatedAt
@@ -29,6 +30,33 @@ export const FREE_AGENTS = freeAgentsData as {
   updatedAt: string
   skaters: FreeAgent[]
   goalies: FreeAgent[]
+}
+
+/** One side's official dressed lineup from an NHL boxscore. */
+export interface GameLineup {
+  forwards: string[]
+  defense: string[]
+  goalies: { name: string; starter: boolean }[]
+}
+
+/** A game on today's NHL scoreboard (empty list in the offseason). */
+export interface GameDayGame {
+  id: number
+  /** FUT | PRE | LIVE | CRIT | OFF | FINAL */
+  state: string
+  startUtc: string | null
+  home: string | null
+  away: string | null
+  homeScore: number | null
+  awayScore: number | null
+  lineups: Record<string, GameLineup | null> | null
+}
+
+export const GAMEDAY = gamedayData as { date: string; updatedAt: string; games: GameDayGame[] }
+
+/** Today's game for a team, if the scoreboard has one. */
+export function getGameFor(teamId: string): GameDayGame | null {
+  return GAMEDAY.games.find((g) => g.home === teamId || g.away === teamId) ?? null
 }
 
 const STATS: Record<string, PlayerStats> =

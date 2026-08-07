@@ -432,7 +432,69 @@ if (skaterSeasons.length > 0) {
 }
 
 // ---------------------------------------------------------------------------
-// 7. Timestamp.
+// 7. Today's games and official game rosters.
+// ---------------------------------------------------------------------------
+// The scoreboard lists today's slate year-round (empty in the offseason).
+// Once a game leaves the FUT/PRE states the boxscore carries the official
+// dressed lineup and starting goalie, which the team pages surface.
+
+{
+  let scheduleDate = now.toISOString().slice(0, 10)
+  const games = []
+  try {
+    const res = await fetch('https://api-web.nhle.com/v1/score/now', { headers: UA })
+    if (!res.ok) throw new Error(`HTTP ${res.status}`)
+    const sc = await res.json()
+    if (sc.currentDate) scheduleDate = sc.currentDate
+    for (const g of sc.games ?? []) {
+      const entry = {
+        id: g.id,
+        state: g.gameState ?? 'FUT', // FUT | PRE | LIVE | CRIT | OFF | FINAL
+        startUtc: g.startTimeUTC ?? null,
+        home: g.homeTeam?.abbrev ?? null,
+        away: g.awayTeam?.abbrev ?? null,
+        homeScore: g.homeTeam?.score ?? null,
+        awayScore: g.awayTeam?.score ?? null,
+        lineups: null,
+      }
+      const started = entry.state && entry.state !== 'FUT' && entry.state !== 'PRE'
+      if (started && entry.home && entry.away) {
+        try {
+          const bs = await fetch(`https://api-web.nhle.com/v1/gamecenter/${g.id}/boxscore`, {
+            headers: UA,
+          })
+          if (bs.ok) {
+            const b = await bs.json()
+            const side = (key) => {
+              const s = b.playerByGameStats?.[key]
+              if (!s) return null
+              const nm = (p) => p.name?.default ?? ''
+              return {
+                forwards: (s.forwards ?? []).map(nm).filter(Boolean),
+                defense: (s.defense ?? []).map(nm).filter(Boolean),
+                goalies: (s.goalies ?? []).map((p) => ({ name: nm(p), starter: !!p.starter })),
+              }
+            }
+            entry.lineups = { [entry.home]: side('homeTeam'), [entry.away]: side('awayTeam') }
+          }
+        } catch (e) {
+          console.log(`Boxscore ${g.id} unavailable (${e.message}); continuing.`)
+        }
+      }
+      games.push(entry)
+    }
+    console.log(`Game day: ${games.length} game(s) on ${scheduleDate}.`)
+  } catch (e) {
+    console.log(`Scoreboard unavailable (${e.message}); writing empty game day.`)
+  }
+  writeFileSync(
+    dataUrl('gameday.json'),
+    JSON.stringify({ date: scheduleDate, updatedAt: now.toISOString(), games }) + '\n',
+  )
+}
+
+// ---------------------------------------------------------------------------
+// 8. Timestamp.
 // ---------------------------------------------------------------------------
 
 const stamp = JSON.stringify({ updatedAt: now.toISOString() }, null, 2) + '\n'
