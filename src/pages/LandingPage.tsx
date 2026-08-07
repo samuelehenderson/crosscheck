@@ -6,6 +6,7 @@ import { Link } from 'react-router-dom'
 import { useStore } from '../store'
 import { FREE_AGENTS, STATS_SEASON } from '../data'
 import { TeamBadge } from '../components/TeamBadge'
+import { WirePanel } from '../components/WirePanel'
 import type { Team } from '../types'
 
 const DIVISIONS: Team['division'][] = ['Atlantic', 'Central', 'Metropolitan', 'Pacific']
@@ -173,6 +174,8 @@ export function LandingPage() {
           ))}
         </div>
       </section>
+
+      <WirePanel />
 
       {/* Methodology / fairness */}
       <section className="rounded-2xl border border-rink-700 bg-rink-850/60 p-6 sm:p-8">

@@ -450,6 +450,7 @@ if (skaterSeasons.length > 0) {
       const entry = {
         id: g.id,
         state: g.gameState ?? 'FUT', // FUT | PRE | LIVE | CRIT | OFF | FINAL
+        type: g.gameType ?? 2, // 1 preseason, 2 regular season, 3 playoffs
         startUtc: g.startTimeUTC ?? null,
         home: g.homeTeam?.abbrev ?? null,
         away: g.awayTeam?.abbrev ?? null,
@@ -469,10 +470,22 @@ if (skaterSeasons.length > 0) {
               const s = b.playerByGameStats?.[key]
               if (!s) return null
               const nm = (p) => p.name?.default ?? ''
+              const skaters = [...(s.forwards ?? []), ...(s.defense ?? [])]
+              const top = skaters
+                .map((p) => ({
+                  name: nm(p),
+                  g: p.goals ?? 0,
+                  a: p.assists ?? 0,
+                  p: p.points ?? (p.goals ?? 0) + (p.assists ?? 0),
+                }))
+                .filter((p) => p.name && p.p > 0)
+                .sort((x, y) => y.p - x.p || y.g - x.g)
+                .slice(0, 3)
               return {
                 forwards: (s.forwards ?? []).map(nm).filter(Boolean),
                 defense: (s.defense ?? []).map(nm).filter(Boolean),
                 goalies: (s.goalies ?? []).map((p) => ({ name: nm(p), starter: !!p.starter })),
+                top,
               }
             }
             entry.lineups = { [entry.home]: side('homeTeam'), [entry.away]: side('awayTeam') }
@@ -494,7 +507,70 @@ if (skaterSeasons.length > 0) {
 }
 
 // ---------------------------------------------------------------------------
-// 8. Timestamp.
+// 8. Team schedules: last result + upcoming games for every club.
+// ---------------------------------------------------------------------------
+
+{
+  // The season that is either underway or up next (flips July 1st).
+  const yr = now.getUTCMonth() >= 6 ? now.getUTCFullYear() : now.getUTCFullYear() - 1
+  const seasonId = `${yr}${yr + 1}`
+  const outTeams = {}
+  let schedOk = 0
+  for (const t of teams) {
+    try {
+      const res = await fetch(
+        `https://api-web.nhle.com/v1/club-schedule-season/${t.id}/${seasonId}`,
+        { headers: UA },
+      )
+      if (!res.ok) throw new Error(`HTTP ${res.status}`)
+      const sched = await res.json()
+      const games = sched.games ?? []
+      const finals = games.filter((g) => g.gameState === 'OFF' || g.gameState === 'FINAL')
+      const lastG = finals[finals.length - 1] ?? null
+      const last = lastG
+        ? (() => {
+            const home = lastG.homeTeam?.abbrev === t.id
+            const us = home ? lastG.homeTeam : lastG.awayTeam
+            const them = home ? lastG.awayTeam : lastG.homeTeam
+            return {
+              date: lastG.gameDate ?? null,
+              opp: them?.abbrev ?? null,
+              home,
+              usScore: us?.score ?? null,
+              oppScore: them?.score ?? null,
+              endType: lastG.gameOutcome?.lastPeriodType ?? 'REG', // REG | OT | SO
+            }
+          })()
+        : null
+      const next = games
+        .filter((g) => g.startTimeUTC && new Date(g.startTimeUTC).getTime() > now.getTime())
+        .slice(0, 5)
+        .map((g) => {
+          const home = g.homeTeam?.abbrev === t.id
+          return {
+            date: g.gameDate ?? null,
+            startUtc: g.startTimeUTC,
+            opp: home ? (g.awayTeam?.abbrev ?? null) : (g.homeTeam?.abbrev ?? null),
+            home,
+            type: g.gameType ?? 2,
+          }
+        })
+      outTeams[t.id] = { last, next }
+      schedOk++
+    } catch (e) {
+      console.log(`Schedule ${t.id} unavailable (${e.message}); continuing.`)
+      outTeams[t.id] = { last: null, next: [] }
+    }
+  }
+  writeFileSync(
+    dataUrl('schedules.json'),
+    JSON.stringify({ season: seasonId, updatedAt: now.toISOString(), teams: outTeams }) + '\n',
+  )
+  console.log(`Wrote schedules.json (${schedOk}/${teams.length} teams).`)
+}
+
+// ---------------------------------------------------------------------------
+// 9. Timestamp.
 // ---------------------------------------------------------------------------
 
 const stamp = JSON.stringify({ updatedAt: now.toISOString() }, null, 2) + '\n'

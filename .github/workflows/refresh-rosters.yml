@@ -26,6 +26,12 @@ jobs:
           node-version: 20
       - name: Refresh rosters, ratings, stats, injuries & free agents
         run: node scripts/refresh-data.mjs
+      - name: Fetch X wire (needs X_BEARER_TOKEN secret)
+        env:
+          X_BEARER_TOKEN: ${{ secrets.X_BEARER_TOKEN }}
+          X_WIRE_QUERY: ${{ secrets.X_WIRE_QUERY }}
+        run: node scripts/fetch-wire.mjs
+        continue-on-error: true
       - name: Commit refreshed rosters
         run: |
           if [[ -n "$(git status --porcelain)" ]]; then

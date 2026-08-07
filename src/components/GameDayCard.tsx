@@ -37,16 +37,31 @@ export function GameDayCard({ team }: { team: Team }) {
   const starter = lineup?.goalies.find((g) => g.starter) ?? null
   const time = localTime(game.startUtc)
 
+  // The scoreboard shows the next slate during breaks — label honestly.
+  const gameDay = game.startUtc ? new Date(game.startUtc).toDateString() : null
+  const isToday = gameDay === new Date().toDateString()
+  const dayLabel =
+    !isToday && game.startUtc
+      ? new Date(game.startUtc).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })
+      : null
+
   return (
     <div className="rounded-2xl border border-ice-400/25 bg-rink-850/70 p-4">
       <div className="flex items-center justify-between">
         <h3 className="text-[11px] font-semibold uppercase tracking-widest text-slate-500">
-          Today's game
+          {isToday ? "Today's game" : `Next game${dayLabel ? ` · ${dayLabel}` : ''}`}
         </h3>
-        <span
-          className={`rounded px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wide ${badge.cls}`}
-        >
-          {badge.label}
+        <span className="flex items-center gap-1.5">
+          {game.type === 1 && (
+            <span className="rounded bg-rink-700 px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wide text-slate-400">
+              Preseason
+            </span>
+          )}
+          <span
+            className={`rounded px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wide ${badge.cls}`}
+          >
+            {badge.label}
+          </span>
         </span>
       </div>
 
@@ -78,6 +93,14 @@ export function GameDayCard({ team }: { team: Team }) {
             <span className="text-slate-500">Dressed:</span>{' '}
             {lineup.forwards.length}F · {lineup.defense.length}D · {lineup.goalies.length}G
           </div>
+          {lineup.top && lineup.top.length > 0 && (
+            <div>
+              <span className="text-slate-500">Leading:</span>{' '}
+              {lineup.top
+                .map((p) => `${p.name} ${p.g}G ${p.a}A`)
+                .join(' · ')}
+            </div>
+          )}
         </div>
       ) : (
         <p className="mt-3 border-t border-rink-700 pt-3 text-[11px] leading-relaxed text-slate-600">

@@ -17,6 +17,8 @@ import statsData from './stats.json'
 import injuriesData from './injuries.json'
 import freeAgentsData from './freeAgents.json'
 import gamedayData from './gameday.json'
+import schedulesData from './schedules.json'
+import wireData from './wire.json'
 
 /** When the bundled rosters were last refreshed from the NHL feed (ISO). */
 export const UPDATED_AT: string = (updated as { updatedAt: string }).updatedAt
@@ -37,6 +39,8 @@ export interface GameLineup {
   forwards: string[]
   defense: string[]
   goalies: { name: string; starter: boolean }[]
+  /** Top point-getters in this game (present once it has started). */
+  top?: { name: string; g: number; a: number; p: number }[]
 }
 
 /** A game on today's NHL scoreboard (empty list in the offseason). */
@@ -44,6 +48,8 @@ export interface GameDayGame {
   id: number
   /** FUT | PRE | LIVE | CRIT | OFF | FINAL */
   state: string
+  /** 1 preseason, 2 regular season, 3 playoffs. */
+  type?: number
   startUtc: string | null
   home: string | null
   away: string | null
@@ -58,6 +64,50 @@ export const GAMEDAY = gamedayData as { date: string; updatedAt: string; games: 
 export function getGameFor(teamId: string): GameDayGame | null {
   return GAMEDAY.games.find((g) => g.home === teamId || g.away === teamId) ?? null
 }
+
+/** A team's most recent final score. */
+export interface LastResult {
+  date: string | null
+  opp: string | null
+  home: boolean
+  usScore: number | null
+  oppScore: number | null
+  /** REG | OT | SO */
+  endType: string
+}
+
+/** An upcoming game on a team's schedule. */
+export interface UpcomingGame {
+  date: string | null
+  startUtc: string
+  opp: string | null
+  home: boolean
+  /** 1 preseason, 2 regular season, 3 playoffs. */
+  type: number
+}
+
+export const SCHEDULES = schedulesData as {
+  season: string
+  updatedAt: string
+  teams: Record<string, { last: LastResult | null; next: UpcomingGame[] }>
+}
+
+export function getScheduleFor(teamId: string): { last: LastResult | null; next: UpcomingGame[] } {
+  return SCHEDULES.teams[teamId] ?? { last: null, next: [] }
+}
+
+/** NHL insider tweets fetched by the wire pipeline (empty until the
+ *  X_BEARER_TOKEN secret is configured). */
+export interface WireTweet {
+  id: string
+  text: string
+  author: string
+  handle: string
+  createdAt: string | null
+  url: string
+}
+
+export const WIRE = wireData as { updatedAt: string; tweets: WireTweet[] }
 
 const STATS: Record<string, PlayerStats> =
   (statsData as { players?: Record<string, PlayerStats> }).players ?? {}
