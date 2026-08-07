@@ -69,13 +69,14 @@ export function LandingPage() {
             Live data · updated {agoLabel(updatedAt)}
           </div>
           <h1 className="text-4xl font-black leading-tight tracking-tight text-white sm:text-5xl">
-            Every team. Same math.
+            Trade anyone. Sign anyone.
             <br />
-            <span className="text-ice-400">Zero favorites.</span>
+            <span className="text-ice-400">Watch the league shift.</span>
           </h1>
           <p className="mt-4 max-w-xl text-base leading-relaxed text-slate-400">
-            Build trades, sign free agents, and project contracts for all 32 NHL clubs — scored by
-            one identical model, fed by live rosters, stats, and injuries.
+            The live NHL sandbox — real rosters, stats, and injuries for all 32 clubs. Build the
+            blockbuster, project the contract, and watch playoff odds move the second you pull the
+            trigger.
           </p>
           <div className="mt-7 flex flex-wrap gap-3">
             <button
@@ -87,6 +88,12 @@ export function LandingPage() {
               Pick your team
             </button>
             <Link
+              to="/wire"
+              className="rounded-lg border border-rink-700 bg-rink-850 px-5 py-2.5 text-sm font-semibold text-slate-200 transition hover:border-ice-400/40 hover:text-white"
+            >
+              The Wire
+            </Link>
+            <Link
               to="/league"
               className="rounded-lg border border-rink-700 bg-rink-850 px-5 py-2.5 text-sm font-semibold text-slate-200 transition hover:border-ice-400/40 hover:text-white"
             >
@@ -96,7 +103,7 @@ export function LandingPage() {
               to="/contracts"
               className="rounded-lg border border-rink-700 bg-rink-850 px-5 py-2.5 text-sm font-semibold text-slate-200 transition hover:border-ice-400/40 hover:text-white"
             >
-              Contract Engine
+              PuckPayroll
             </Link>
           </div>
         </div>
@@ -119,6 +126,9 @@ export function LandingPage() {
           ))}
         </div>
       </section>
+
+      {/* Live news feed, front and center */}
+      <WirePanel />
 
       {/* Team grid — alphabetical inside each division, no ordering by strength */}
       <section id="teams" className="scroll-mt-20 space-y-4">
@@ -174,8 +184,6 @@ export function LandingPage() {
           ))}
         </div>
       </section>
-
-      <WirePanel />
 
       {/* Methodology / fairness */}
       <section className="rounded-2xl border border-rink-700 bg-rink-850/60 p-6 sm:p-8">
