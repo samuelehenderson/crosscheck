@@ -27,8 +27,8 @@ const FEATURES = [
   },
   {
     to: '/contracts',
-    title: 'Contract Engine',
-    desc: 'Project a market deal for any player: AAV × term, cap share, and the CBA 20% clamp.',
+    title: 'PuckPayroll',
+    desc: 'The contract engine — project a market deal for any player: AAV × term, cap share, and the CBA 20% clamp.',
   },
   {
     to: '/free-agents',

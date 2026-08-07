@@ -1,6 +1,6 @@
 {
-  "name": "PuckPayroll — NHL Rosters, Trades & Contracts",
-  "short_name": "PuckPayroll",
+  "name": "IceMetrix — NHL Rosters, Trades & Contracts",
+  "short_name": "IceMetrix",
   "description": "NHL roster, trade & contract lab for all 32 teams with live data.",
   "start_url": "./",
   "display": "standalone",

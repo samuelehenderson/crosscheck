@@ -17,27 +17,30 @@ import { ContractsPage } from './pages/ContractsPage'
 import { LandingPage } from './pages/LandingPage'
 
 function BrandMark() {
-  // Neon puck with a subtle dollar cut — payroll meets the rink.
+  // Ice-crystal hexagon with a rising stat line — ice plus metrics.
   return (
-    // Chip stays dark in both themes so the neon puck always pops.
+    // Chip stays dark in both themes so the neon mark always pops.
     <div
       className="grid h-9 w-9 place-items-center rounded-lg ring-1 ring-[#60d4fe]/40"
       style={{ background: '#0e141a' }}
     >
       <svg viewBox="0 0 32 32" className="h-6 w-6" aria-hidden>
-        <g stroke="#60d4fe" strokeWidth="2.2" strokeLinecap="round" fill="none">
-          {/* puck, side view */}
-          <ellipse cx="16" cy="12.5" rx="10" ry="4.4" />
-          <path d="M6 12.5 V19 c0 2.4 4.5 4.4 10 4.4 s10-2 10-4.4 V12.5" />
-        </g>
-        {/* dollar tick on the puck face */}
         <path
-          d="M16 15.2 V22.6 M18.1 16.6 h-3.2 a1.3 1.3 0 0 0 0 2.6 h2.2 a1.3 1.3 0 0 1 0 2.6 h-3.2"
-          stroke="#8ee0ff"
-          strokeWidth="1.4"
-          strokeLinecap="round"
+          d="M16 5.5 L6.9 10.75 V21.25 L16 26.5 L25.1 21.25 V10.75 Z"
           fill="none"
+          stroke="#60d4fe"
+          strokeWidth="2.1"
+          strokeLinejoin="round"
         />
+        <path
+          d="M10 20.5 L13.5 16.5 L16.5 18.3 L22 12.5"
+          fill="none"
+          stroke="#8ee0ff"
+          strokeWidth="1.7"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        />
+        <circle cx="22" cy="12.5" r="1.6" fill="#60d4fe" />
       </svg>
     </div>
   )
@@ -49,10 +52,10 @@ function Brand() {
       <BrandMark />
       <div className="leading-none">
         <div className="text-sm font-black tracking-tight text-white">
-          PUCK<span className="text-ice-400">PAYROLL</span>
+          ICE<span className="text-ice-400">METRIX</span>
         </div>
         {/* Subtitle wraps into a blob on phones — wordmark only there. */}
-        <div className="hidden text-[10px] uppercase tracking-widest text-slate-500 sm:block">
+        <div className="hidden whitespace-nowrap text-[10px] uppercase tracking-widest text-slate-500 sm:block">
           Rosters · Trades · Contracts
         </div>
       </div>
@@ -100,31 +103,31 @@ function Shell() {
           <nav className="ml-2 hidden items-center gap-1 sm:flex">
             <Link
               to="/league"
-              className="rounded-lg px-3 py-1.5 text-sm font-medium text-slate-300 transition hover:bg-rink-850 hover:text-white"
+              className="whitespace-nowrap rounded-lg px-3 py-1.5 text-sm font-medium text-slate-300 transition hover:bg-rink-850 hover:text-white"
             >
               Power Rankings
             </Link>
             <Link
               to="/free-agents"
-              className="rounded-lg px-3 py-1.5 text-sm font-medium text-slate-300 transition hover:bg-rink-850 hover:text-white"
+              className="whitespace-nowrap rounded-lg px-3 py-1.5 text-sm font-medium text-slate-300 transition hover:bg-rink-850 hover:text-white"
             >
               Free Agents
             </Link>
             <Link
               to="/leaders"
-              className="rounded-lg px-3 py-1.5 text-sm font-medium text-slate-300 transition hover:bg-rink-850 hover:text-white"
+              className="whitespace-nowrap rounded-lg px-3 py-1.5 text-sm font-medium text-slate-300 transition hover:bg-rink-850 hover:text-white"
             >
               Leaders
             </Link>
             <Link
               to="/contracts"
-              className="rounded-lg px-3 py-1.5 text-sm font-medium text-slate-300 transition hover:bg-rink-850 hover:text-white"
+              className="whitespace-nowrap rounded-lg px-3 py-1.5 text-sm font-medium text-slate-300 transition hover:bg-rink-850 hover:text-white"
             >
               Contracts
             </Link>
             <Link
               to="/wire"
-              className="rounded-lg px-3 py-1.5 text-sm font-medium text-slate-300 transition hover:bg-rink-850 hover:text-white"
+              className="whitespace-nowrap rounded-lg px-3 py-1.5 text-sm font-medium text-slate-300 transition hover:bg-rink-850 hover:text-white"
             >
               The Wire
             </Link>
@@ -233,7 +236,7 @@ function Shell() {
       </div>
 
       <footer className="mx-auto max-w-7xl px-4 py-8 text-center text-xs text-slate-600">
-        PuckPayroll · rosters, trades & contracts for all 32 NHL teams · ratings and dollars are
+        IceMetrix · rosters, trades & contracts for all 32 NHL teams · ratings and dollars are
         estimates
       </footer>
     </div>

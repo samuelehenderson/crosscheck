@@ -35,7 +35,7 @@ export default async function handler(req, res) {
 
   const label = { bug: '🐛 Bug report', idea: '💡 Idea', other: '💬 Feedback' }[type]
   const lines = [
-    `**${label}** — PuckPayroll`,
+    `**${label}** — IceMetrix`,
     message,
     contact && `— contact: ${contact}`,
     page && `— page: ${page}`,

@@ -76,10 +76,12 @@ export function ContractsPage() {
   return (
     <div className="space-y-5">
       <div>
-        <h1 className="text-2xl font-black text-white">Contract Engine</h1>
+        <h1 className="text-2xl font-black text-white">
+          Puck<span className="text-ice-400">Payroll</span>
+        </h1>
         <p className="text-sm text-slate-400">
-          Project a market contract for any player — or invent one. Tune age and rating and watch
-          the number move.
+          The IceMetrix contract engine — project a market deal for any player, or invent one.
+          Tune age and rating and watch the number move.
         </p>
       </div>
 

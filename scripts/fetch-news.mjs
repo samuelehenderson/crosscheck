@@ -8,7 +8,7 @@
 import { readFileSync, writeFileSync } from 'fs'
 
 const dataUrl = (f) => new URL(`../src/data/${f}`, import.meta.url)
-const UA = { 'User-Agent': 'Mozilla/5.0 (compatible; PuckPayroll/1.0)' }
+const UA = { 'User-Agent': 'Mozilla/5.0 (compatible; IceMetrix/1.0)' }
 
 const FEEDS = [
   { source: 'ESPN NHL', url: 'https://www.espn.com/espn/rss/nhl/news' },
