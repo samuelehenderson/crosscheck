@@ -41,9 +41,9 @@ const FEATURES = [
     desc: `Live ${STATS_SEASON || 'season'} stat races across goals, assists, points, and goaltending.`,
   },
   {
-    to: '/media',
-    title: 'IceMetrix Media',
-    desc: 'Creator-powered coverage — articles, graphics, and reports from the community.',
+    to: '/wire',
+    title: 'The Wire',
+    desc: 'Live NHL headlines plus IceMetrix Media — creator articles, graphics, and reports.',
   },
 ]
 

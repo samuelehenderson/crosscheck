@@ -1,11 +1,13 @@
-// Media hub concept demo: a creator-powered publishing page. Content lives as
-// data in the repo (src/data/media.json) — the same content-in-repo pipeline
-// the roster refresh uses, which is exactly how a real version could work:
-// creators submit → content lands in the repo/CMS → the site redeploys.
+// The Wire: the site's news + media home. Top half is the live feed (NHL
+// headlines from RSS outlets, plus X insiders when configured); bottom half is
+// the IceMetrix Media creator hub. Creator content lives as data in the repo
+// (src/data/media.json) — the same content-in-repo pipeline the roster refresh
+// uses: creators submit → content lands in the repo/CMS → the site redeploys.
 
 import { useMemo, useState } from 'react'
 import mediaData from '../data/media.json'
 import { initials } from '../lib/format'
+import { WireFeed, wireItems } from '../components/WirePanel'
 
 interface MediaItem {
   id: string
@@ -94,7 +96,7 @@ function ReaderModal({ item, onClose }: { item: MediaItem; onClose: () => void }
   )
 }
 
-export function MediaPage() {
+export function WirePage() {
   const [filter, setFilter] = useState<Filter>('all')
   const [reading, setReading] = useState<MediaItem | null>(null)
 
@@ -106,17 +108,33 @@ export function MediaPage() {
         .filter((i) => filter === 'all' || i.type === filter),
     [featured.id, filter],
   )
+  const hasFeed = wireItems().length > 0
 
   return (
     <div className="space-y-5">
       <div>
-        <div className="flex flex-wrap items-center gap-2">
-          <h1 className="text-2xl font-black text-white">{DATA.brand}</h1>
-          <span className="rounded-full bg-amber-400/15 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-amber-300 ring-1 ring-amber-400/30">
-            Concept demo
-          </span>
-        </div>
-        <p className="text-sm text-slate-400">{DATA.tagline}</p>
+        <h1 className="text-2xl font-black text-white">The Wire</h1>
+        <p className="text-sm text-slate-400">
+          Live NHL news and creator coverage — headlines refresh automatically with the data cycle.
+        </p>
+      </div>
+
+      {/* Live feed */}
+      {hasFeed ? (
+        <WireFeed limit={12} />
+      ) : (
+        <p className="rounded-2xl border border-dashed border-rink-700 p-4 text-center text-xs text-slate-600">
+          The live feed fills in with the next data refresh.
+        </p>
+      )}
+
+      {/* Creator hub */}
+      <div className="flex flex-wrap items-center gap-2 pt-4">
+        <h2 className="text-xl font-black text-white">{DATA.brand}</h2>
+        <span className="rounded-full bg-amber-400/15 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-amber-300 ring-1 ring-amber-400/30">
+          Concept demo
+        </span>
+        <p className="w-full text-sm text-slate-400">{DATA.tagline}</p>
       </div>
 
       {/* Featured */}

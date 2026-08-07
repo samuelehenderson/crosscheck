@@ -12,7 +12,7 @@ import { TeamPage } from './pages/TeamPage'
 import { LeaguePage } from './pages/LeaguePage'
 import { FreeAgentsPage } from './pages/FreeAgentsPage'
 import { LeadersPage } from './pages/LeadersPage'
-import { MediaPage } from './pages/MediaPage'
+import { WirePage } from './pages/WirePage'
 import { ContractsPage } from './pages/ContractsPage'
 import { LandingPage } from './pages/LandingPage'
 
@@ -123,10 +123,10 @@ function Shell() {
               Contracts
             </Link>
             <Link
-              to="/media"
+              to="/wire"
               className="rounded-lg px-3 py-1.5 text-sm font-medium text-slate-300 transition hover:bg-rink-850 hover:text-white"
             >
-              Media
+              The Wire
             </Link>
           </nav>
           <div className="ml-auto flex items-center gap-2 sm:gap-3">
@@ -196,7 +196,7 @@ function Shell() {
                 Contracts
               </NavLink>
               <NavLink
-                to="/media"
+                to="/wire"
                 onClick={() => setMobileOpen(false)}
                 className={({ isActive }) =>
                   `rounded-lg px-3 py-2 text-sm font-semibold transition ${
@@ -204,7 +204,7 @@ function Shell() {
                   }`
                 }
               >
-                Media
+                The Wire
               </NavLink>
               <div className="mt-2 px-1 text-[10px] font-semibold uppercase tracking-widest text-slate-600">
                 Teams
@@ -224,7 +224,9 @@ function Shell() {
             <Route path="/free-agents" element={<FreeAgentsPage />} />
             <Route path="/leaders" element={<LeadersPage />} />
             <Route path="/contracts" element={<ContractsPage />} />
-            <Route path="/media" element={<MediaPage />} />
+            <Route path="/wire" element={<WirePage />} />
+            {/* Shared /media links keep working. */}
+            <Route path="/media" element={<Navigate to="/wire" replace />} />
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
         </main>
