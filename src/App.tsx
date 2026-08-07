@@ -51,7 +51,8 @@ function Brand() {
         <div className="text-sm font-black tracking-tight text-white">
           PUCK<span className="text-ice-400">PAYROLL</span>
         </div>
-        <div className="text-[10px] uppercase tracking-widest text-slate-500">
+        {/* Subtitle wraps into a blob on phones — wordmark only there. */}
+        <div className="hidden text-[10px] uppercase tracking-widest text-slate-500 sm:block">
           Rosters · Trades · Contracts
         </div>
       </div>
@@ -67,10 +68,10 @@ function TradeCountPill() {
   return (
     <button
       onClick={clearTrades}
-      className="rounded-full bg-ice-400/15 px-3 py-1 text-xs font-semibold text-ice-300 ring-1 ring-ice-400/30 transition hover:bg-ice-400/25"
+      className="whitespace-nowrap rounded-full bg-ice-400/15 px-3 py-1 text-xs font-semibold text-ice-300 ring-1 ring-ice-400/30 transition hover:bg-ice-400/25"
       title="Clear all trades and signings"
     >
-      {total} move{total === 1 ? '' : 's'} · clear
+      {total} move{total === 1 ? '' : 's'} <span className="hidden sm:inline">· clear</span>
     </button>
   )
 }
@@ -85,7 +86,7 @@ function Shell() {
     <div className="min-h-screen">
       {/* Top bar */}
       <header className="sticky top-0 z-40 border-b border-rink-800 bg-rink-950/85 backdrop-blur">
-        <div className="mx-auto flex max-w-7xl items-center gap-4 px-4 py-3">
+        <div className="mx-auto flex max-w-7xl items-center gap-2 px-3 py-3 sm:gap-4 sm:px-4">
           {!isHome && (
             <button
               onClick={() => setMobileOpen((v) => !v)}

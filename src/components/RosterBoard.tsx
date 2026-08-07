@@ -17,29 +17,41 @@ interface Props {
 
 function Card({
   slot,
+  tag,
   team,
   newIds,
   onTrade,
 }: {
   slot: Slotted | undefined
+  /** Position tag shown only on mobile, where the column headers are hidden. */
+  tag: string
   team: Team
   newIds: Set<string>
   onTrade?: (player: Player) => void
 }) {
+  // Empty slots only make sense in the aligned desktop grid — on mobile the
+  // stacked list just skips them.
   if (!slot)
     return (
-      <div className="grid min-h-[52px] place-items-center rounded-lg border border-dashed border-rink-700 text-xs text-slate-600">
+      <div className="hidden min-h-[52px] place-items-center rounded-lg border border-dashed border-rink-700 text-xs text-slate-600 sm:grid">
         —
       </div>
     )
   return (
-    <PlayerCard
-      player={slot.player}
-      team={team}
-      isNew={newIds.has(slot.player.id)}
-      shiftedFrom={slot.shiftedFrom}
-      onTrade={onTrade}
-    />
+    <div className="flex items-center gap-2">
+      <span className="w-6 shrink-0 text-right text-[9px] font-bold uppercase tracking-wide text-slate-600 sm:hidden">
+        {tag}
+      </span>
+      <div className="min-w-0 flex-1">
+        <PlayerCard
+          player={slot.player}
+          team={team}
+          isNew={newIds.has(slot.player.id)}
+          shiftedFrom={slot.shiftedFrom}
+          onTrade={onTrade}
+        />
+      </div>
+    </div>
   )
 }
 
@@ -55,8 +67,9 @@ function RowLabel({ children }: { children: string }) {
 }
 
 function ColHeads({ labels }: { labels: string[] }) {
+  // Hidden on mobile, where cards stack and carry their own position tags.
   return (
-    <div className={`grid gap-3 ${labels.length === 2 ? 'grid-cols-2' : 'grid-cols-3'}`}>
+    <div className={`hidden gap-3 sm:grid ${labels.length === 2 ? 'grid-cols-2' : 'grid-cols-3'}`}>
       {labels.map((l) => (
         <div
           key={l}
@@ -99,10 +112,10 @@ export function RosterBoard({ team, newIds, onTrade }: Props) {
         {Array.from({ length: fRows }, (_, i) => (
           <div key={i} className="space-y-2">
             {fLabel(i) && <RowLabel>{fLabel(i)!}</RowLabel>}
-            <div className="grid grid-cols-3 gap-3">
-              <Card slot={lines.LW[i]} {...shared} />
-              <Card slot={lines.C[i]} {...shared} />
-              <Card slot={lines.RW[i]} {...shared} />
+            <div className="grid grid-cols-1 gap-2 sm:grid-cols-3 sm:gap-3">
+              <Card slot={lines.LW[i]} tag="LW" {...shared} />
+              <Card slot={lines.C[i]} tag="C" {...shared} />
+              <Card slot={lines.RW[i]} tag="RW" {...shared} />
             </div>
           </div>
         ))}
@@ -115,9 +128,9 @@ export function RosterBoard({ team, newIds, onTrade }: Props) {
           {Array.from({ length: dRows }, (_, i) => (
             <div key={i} className="space-y-2">
               {dLabel(i) && <RowLabel>{dLabel(i)!}</RowLabel>}
-              <div className="grid grid-cols-2 gap-3">
-                <Card slot={ld[i]} {...shared} />
-                <Card slot={rd[i]} {...shared} />
+              <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 sm:gap-3">
+                <Card slot={ld[i]} tag="LD" {...shared} />
+                <Card slot={rd[i]} tag="RD" {...shared} />
               </div>
             </div>
           ))}
@@ -127,10 +140,10 @@ export function RosterBoard({ team, newIds, onTrade }: Props) {
           {goalies.map((g, i) => (
             <div key={g.player.id} className="space-y-2">
               {gLabel(i) && <RowLabel>{gLabel(i)!}</RowLabel>}
-              <Card slot={g} {...shared} />
+              <Card slot={g} tag="G" {...shared} />
             </div>
           ))}
-          {goalies.length === 0 && <Card slot={undefined} {...shared} />}
+          {goalies.length === 0 && <Card slot={undefined} tag="G" {...shared} />}
         </div>
       </div>
     </div>
