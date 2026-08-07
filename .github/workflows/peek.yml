@@ -1,0 +1,55 @@
+name: Peek external site
+
+# Manual diagnostic: fetches a public site's HTML/CSS/JS and prints theme
+# tokens (colors, fonts) and UI strings, so the design can be studied from an
+# environment that can't reach it directly. Used for the PuckPayroll rebrand.
+
+on:
+  workflow_dispatch:
+    inputs:
+      url:
+        description: 'Site URL to inspect'
+        required: true
+        default: 'https://puckpayroll.vercel.app/'
+
+jobs:
+  peek:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Fetch and analyze
+        run: |
+          URL="${{ inputs.url }}"
+          echo "=== INDEX HTML ==="
+          curl -sSL --max-time 30 "$URL" -o index.html
+          cat index.html
+          echo ""
+          echo "=== ASSET URLS ==="
+          grep -oE '(src|href)="[^"]+\.(css|js)[^"]*"' index.html | sed 's/^(src|href)=//' | tr -d '"' | sed 's/src=//;s/href=//' | sort -u | tee assets.txt
+          echo ""
+          BASE=$(echo "$URL" | sed 's#/$##')
+          while read -r a; do
+            case "$a" in
+              http*) full="$a" ;;
+              /*) full="$BASE$a" ;;
+              *) full="$BASE/$a" ;;
+            esac
+            case "$full" in
+              *.css*)
+                echo "=== CSS: $full (colors & fonts) ==="
+                curl -sSL --max-time 30 "$full" -o f.css || continue
+                grep -oE '#[0-9a-fA-F]{3,8}|rgba?\([^)]+\)|oklch\([^)]+\)|font-family:[^;}]{0,80}' f.css | sort | uniq -c | sort -rn | head -60
+                echo "--- css custom properties ---"
+                grep -oE '\-\-[a-z-]+:[^;}]{1,60}' f.css | sort -u | head -80
+                ;;
+              *.js*)
+                echo "=== JS: $full (UI strings & routes) ==="
+                curl -sSL --max-time 30 "$full" -o f.js || continue
+                echo "--- probable nav/feature labels ---"
+                grep -oE '"[A-Z][A-Za-z0-9 &/-]{2,28}"' f.js | sort -u | head -150
+                echo "--- probable routes ---"
+                grep -oE '"/[a-z][a-z0-9/-]{1,30}"' f.js | sort -u | head -60
+                echo "--- hex colors in js ---"
+                grep -oE '#[0-9a-fA-F]{6}' f.js | sort | uniq -c | sort -rn | head -40
+                ;;
+            esac
+          done < assets.txt
