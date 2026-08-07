@@ -19,6 +19,7 @@ import freeAgentsData from './freeAgents.json'
 import gamedayData from './gameday.json'
 import schedulesData from './schedules.json'
 import wireData from './wire.json'
+import newsData from './news.json'
 
 /** When the bundled rosters were last refreshed from the NHL feed (ISO). */
 export const UPDATED_AT: string = (updated as { updatedAt: string }).updatedAt
@@ -108,6 +109,16 @@ export interface WireTweet {
 }
 
 export const WIRE = wireData as { updatedAt: string; tweets: WireTweet[] }
+
+/** NHL headlines pulled from public RSS feeds — the keyless news wire. */
+export interface NewsItem {
+  source: string
+  title: string
+  url: string
+  publishedAt: string | null
+}
+
+export const NEWS = newsData as { updatedAt: string; items: NewsItem[] }
 
 const STATS: Record<string, PlayerStats> =
   (statsData as { players?: Record<string, PlayerStats> }).players ?? {}
