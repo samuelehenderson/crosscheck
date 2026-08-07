@@ -1,7 +1,7 @@
 // App shell: brand bar, left team-navigation rail, and routed content.
 
 import { useState } from 'react'
-import { Link, NavLink, Navigate, Route, Routes } from 'react-router-dom'
+import { Link, NavLink, Navigate, Route, Routes, useLocation } from 'react-router-dom'
 import { StoreProvider, useStore } from './store'
 import { TeamList } from './components/TeamList'
 import { PlayerSearch } from './components/PlayerSearch'
@@ -12,6 +12,7 @@ import { FreeAgentsPage } from './pages/FreeAgentsPage'
 import { LeadersPage } from './pages/LeadersPage'
 import { MediaPage } from './pages/MediaPage'
 import { ContractsPage } from './pages/ContractsPage'
+import { LandingPage } from './pages/LandingPage'
 
 function BrandMark() {
   // Neon puck with a subtle dollar cut — payroll meets the rink.
@@ -70,19 +71,24 @@ function TradeCountPill() {
 
 function Shell() {
   const [mobileOpen, setMobileOpen] = useState(false)
+  // The landing page carries its own full team grid, so the sidebar (and the
+  // mobile toggle for it) only exist on inner pages.
+  const isHome = useLocation().pathname === '/'
 
   return (
     <div className="min-h-screen">
       {/* Top bar */}
       <header className="sticky top-0 z-40 border-b border-rink-800 bg-rink-950/85 backdrop-blur">
         <div className="mx-auto flex max-w-7xl items-center gap-4 px-4 py-3">
-          <button
-            onClick={() => setMobileOpen((v) => !v)}
-            className="grid h-9 w-9 place-items-center rounded-lg text-slate-300 ring-1 ring-rink-700 lg:hidden"
-            aria-label="Toggle team list"
-          >
-            ☰
-          </button>
+          {!isHome && (
+            <button
+              onClick={() => setMobileOpen((v) => !v)}
+              className="grid h-9 w-9 place-items-center rounded-lg text-slate-300 ring-1 ring-rink-700 lg:hidden"
+              aria-label="Toggle team list"
+            >
+              ☰
+            </button>
+          )}
           <Brand />
           <nav className="ml-2 hidden items-center gap-1 sm:flex">
             <Link
@@ -126,6 +132,7 @@ function Shell() {
 
       <div className="mx-auto flex max-w-7xl gap-6 px-4 py-5">
         {/* Sidebar */}
+        {!isHome && (
         <aside
           className={`${
             mobileOpen ? 'block' : 'hidden'
@@ -197,18 +204,19 @@ function Shell() {
             <TeamList onNavigate={() => setMobileOpen(false)} />
           </div>
         </aside>
+        )}
 
         {/* Main */}
         <main className="min-w-0 flex-1">
           <Routes>
-            <Route path="/" element={<Navigate to="/team/FLA" replace />} />
+            <Route path="/" element={<LandingPage />} />
             <Route path="/team/:teamId" element={<TeamPage />} />
             <Route path="/league" element={<LeaguePage />} />
             <Route path="/free-agents" element={<FreeAgentsPage />} />
             <Route path="/leaders" element={<LeadersPage />} />
             <Route path="/contracts" element={<ContractsPage />} />
             <Route path="/media" element={<MediaPage />} />
-            <Route path="*" element={<Navigate to="/team/FLA" replace />} />
+            <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
         </main>
       </div>
