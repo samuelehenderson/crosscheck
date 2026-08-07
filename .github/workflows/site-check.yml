@@ -10,6 +10,10 @@ on:
         description: 'Site URL to check'
         required: false
         default: 'https://icemetricstemp.vercel.app'
+      test_feedback:
+        description: 'POST a test message to /api/feedback (verifies the Discord webhook)'
+        required: false
+        default: 'no'
 
 jobs:
   check:
@@ -28,3 +32,11 @@ jobs:
           done
           echo "== repo main updatedAt =="
           curl -sS --max-time 20 "https://raw.githubusercontent.com/${{ github.repository }}/main/public/updatedAt.json" || echo "RAW FETCH FAILED"
+      - name: Test feedback webhook
+        if: inputs.test_feedback == 'yes'
+        run: |
+          echo "== POST ${{ inputs.url }}/api/feedback =="
+          curl -sS --max-time 20 -X POST -H "Content-Type: application/json" \
+            -d '{"type":"other","message":"Webhook test from the IceMetrix pipeline — if you can read this in Discord, feedback is fully wired up. 🎉","page":"#/site-check","ua":"github-actions"}' \
+            "${{ inputs.url }}/api/feedback"
+          echo ""
