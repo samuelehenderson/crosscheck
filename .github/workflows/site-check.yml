@@ -1,21 +1,30 @@
 name: Site check
 
-# Manual diagnostic: reports what data timestamp the live site is serving,
-# so we can tell whether Vercel deployments are keeping up with main.
+# Manual diagnostic: reports which vercel.app URL is serving the site, its
+# page title, and what data timestamp it carries vs the repo.
 
 on:
   workflow_dispatch:
+    inputs:
+      url:
+        description: 'Site URL to check'
+        required: false
+        default: 'https://icemetrix.vercel.app'
 
 jobs:
   check:
     runs-on: ubuntu-latest
     steps:
-      - name: Compare live site vs repo
+      - name: Probe candidate URLs
         run: |
-          echo "== live /updatedAt.json =="
-          curl -sS --max-time 20 "https://crosscheck-dusky.vercel.app/updatedAt.json?cb=$(date +%s)" || echo "FETCH FAILED"
-          echo ""
-          echo "== live homepage HTTP status =="
-          curl -sS -o /dev/null -w "%{http_code}\n" --max-time 20 "https://crosscheck-dusky.vercel.app/"
+          for u in "${{ inputs.url }}" "https://icemetrix.vercel.app" "https://crosscheck-dusky.vercel.app"; do
+            echo "== $u =="
+            code=$(curl -sSL -o /tmp/page.html -w "%{http_code}" --max-time 20 "$u/" || echo "000")
+            echo "HTTP $code"
+            grep -oE '<title>[^<]*</title>' /tmp/page.html || true
+            echo "-- /updatedAt.json --"
+            curl -sS --max-time 20 "$u/updatedAt.json?cb=$(date +%s)" || echo "FETCH FAILED"
+            echo ""
+          done
           echo "== repo main updatedAt =="
           curl -sS --max-time 20 "https://raw.githubusercontent.com/${{ github.repository }}/main/public/updatedAt.json" || echo "RAW FETCH FAILED"
