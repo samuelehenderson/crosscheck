@@ -18,8 +18,60 @@
   font-display: swap;
 }
 
+/* Theme tokens. Every Tailwind color in the app resolves to these variables,
+   so [data-theme="light"] restyles the whole product in one place.
+   Space-separated RGB triplets so Tailwind alpha modifiers keep working. */
 :root {
   color-scheme: dark;
+  --rink-950: 9 14 18; /* page background */
+  --rink-900: 14 20 26;
+  --rink-850: 19 25 31; /* card */
+  --rink-800: 27 35 44; /* elevated / hover */
+  --rink-700: 42 50 59; /* hairline borders + chips */
+  --rink-600: 58 68 78;
+  --ice-400: 96 212 254; /* accent */
+  --ice-300: 142 224 255;
+  --up: 74 222 128;
+  --down: 255 101 104;
+  --ink: 255 255 255; /* "white": strongest text */
+  --slate-100: #f1f5f9;
+  --slate-200: #e2e8f0;
+  --slate-300: #cbd5e1;
+  --slate-400: #94a3b8;
+  --slate-500: #64748b;
+  --slate-600: #475569;
+  /* Inline-style helpers (gradients, sliders, scrollbars) */
+  --grad-base: #0e141a;
+  --grad-mid: #13191f;
+  --grad-end: #090e12;
+  --grad-hi: #1b232c;
+  --scrollbar: #ffffff26;
+}
+
+[data-theme='light'] {
+  color-scheme: light;
+  --rink-950: 238 242 246;
+  --rink-900: 231 237 243;
+  --rink-850: 255 255 255;
+  --rink-800: 226 232 240;
+  --rink-700: 210 219 228;
+  --rink-600: 190 200 211;
+  --ice-400: 2 132 199;
+  --ice-300: 7 89 133;
+  --up: 22 163 74;
+  --down: 220 38 38;
+  --ink: 15 23 42;
+  --slate-100: #0f172a;
+  --slate-200: #1e293b;
+  --slate-300: #334155;
+  --slate-400: #475569;
+  --slate-500: #64748b;
+  --slate-600: #94a3b8;
+  --grad-base: #e7edf3;
+  --grad-mid: #ffffff;
+  --grad-end: #eef2f6;
+  --grad-hi: #e2e8f0;
+  --scrollbar: #0f172a26;
 }
 
 html,
@@ -39,16 +91,16 @@ body {
   font-variant-numeric: tabular-nums;
 }
 
-/* Thin, dark scrollbars to match the app chrome */
+/* Thin scrollbars that follow the theme */
 * {
   scrollbar-width: thin;
-  scrollbar-color: #ffffff26 transparent;
+  scrollbar-color: var(--scrollbar) transparent;
 }
 *::-webkit-scrollbar {
   width: 8px;
   height: 8px;
 }
 *::-webkit-scrollbar-thumb {
-  background: #ffffff26;
+  background: var(--scrollbar);
   border-radius: 4px;
 }

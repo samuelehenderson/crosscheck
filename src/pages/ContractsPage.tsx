@@ -172,7 +172,8 @@ export function ContractsPage() {
               max={42}
               value={age}
               onChange={(e) => setAge(Number(e.target.value))}
-              className="w-full accent-[#60d4fe]"
+              className="w-full"
+              style={{ accentColor: 'rgb(var(--ice-400))' }}
             />
           </div>
 
@@ -189,7 +190,8 @@ export function ContractsPage() {
               max={99}
               value={overall}
               onChange={(e) => setOverall(Number(e.target.value))}
-              className="w-full accent-[#60d4fe]"
+              className="w-full"
+              style={{ accentColor: 'rgb(var(--ice-400))' }}
             />
           </div>
 

@@ -6,6 +6,8 @@ import { StoreProvider, useStore } from './store'
 import { TeamList } from './components/TeamList'
 import { PlayerSearch } from './components/PlayerSearch'
 import { RefreshButton } from './components/RefreshButton'
+import { ThemeToggle } from './components/ThemeToggle'
+import { FeedbackButton } from './components/FeedbackButton'
 import { TeamPage } from './pages/TeamPage'
 import { LeaguePage } from './pages/LeaguePage'
 import { FreeAgentsPage } from './pages/FreeAgentsPage'
@@ -17,7 +19,11 @@ import { LandingPage } from './pages/LandingPage'
 function BrandMark() {
   // Neon puck with a subtle dollar cut — payroll meets the rink.
   return (
-    <div className="grid h-9 w-9 place-items-center rounded-lg bg-rink-850 ring-1 ring-ice-400/40">
+    // Chip stays dark in both themes so the neon puck always pops.
+    <div
+      className="grid h-9 w-9 place-items-center rounded-lg ring-1 ring-[#60d4fe]/40"
+      style={{ background: '#0e141a' }}
+    >
       <svg viewBox="0 0 32 32" className="h-6 w-6" aria-hidden>
         <g stroke="#60d4fe" strokeWidth="2.2" strokeLinecap="round" fill="none">
           {/* puck, side view */}
@@ -122,7 +128,9 @@ function Shell() {
               Media
             </Link>
           </nav>
-          <div className="ml-auto flex items-center gap-3">
+          <div className="ml-auto flex items-center gap-2 sm:gap-3">
+            <ThemeToggle />
+            <FeedbackButton />
             <RefreshButton />
             <PlayerSearch />
             <TradeCountPill />

@@ -60,7 +60,7 @@ export function LandingPage() {
           background:
             'radial-gradient(700px 360px at 85% -10%, rgba(96,212,254,.14), transparent 60%),' +
             'radial-gradient(560px 320px at -5% 110%, rgba(96,212,254,.08), transparent 55%),' +
-            '#0e141a',
+            'var(--grad-base)',
         }}
       >
         <div className="max-w-2xl">
