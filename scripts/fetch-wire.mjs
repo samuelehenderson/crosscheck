@@ -17,13 +17,16 @@ if (!token) {
   process.exit(0)
 }
 
-// Well-known NHL insiders; league-wide coverage, no team slant.
+// Everything from the house account (@IceMetrix), plus well-known NHL
+// insiders filtered to roster-news keywords; league-wide coverage, no team
+// slant.
 const DEFAULT_QUERY =
-  '(from:FriedgeHNIC OR from:PierreVLeBrun OR from:DarrenDreger OR from:frank_seravalli ' +
+  '(from:IceMetrix OR ' +
+  '((from:FriedgeHNIC OR from:PierreVLeBrun OR from:DarrenDreger OR from:frank_seravalli ' +
   'OR from:reporterchris OR from:KevinWeekes) ' +
   '(trade OR traded OR trading OR acquire OR acquired OR signs OR signed OR signing ' +
   'OR extension OR waivers OR recalled OR scratched OR lineup OR "starting goalie" ' +
-  'OR injury OR IR OR LTIR) -is:retweet -is:reply'
+  'OR injury OR IR OR LTIR))) -is:retweet -is:reply'
 
 const query = process.env.X_WIRE_QUERY || DEFAULT_QUERY
 
