@@ -1,13 +1,15 @@
 // A single roster row: initials avatar, name, season stat line, optional
 // injury + NEW badges, overall rating, and a hover action to trade the player.
 
-import type { Player, PlayerStats, Team } from '../types'
+import type { Player, PlayerStats, Position, Team } from '../types'
 import { initials } from '../lib/format'
 
 interface Props {
   player: Player
   team: Team
   isNew?: boolean
+  /** Natural position, when the depth chart slots the player elsewhere. */
+  shiftedFrom?: Position
   onTrade?: (player: Player) => void
 }
 
@@ -40,7 +42,7 @@ function injuryTone(short: string): string {
     : 'bg-down/20 text-down'
 }
 
-export function PlayerCard({ player, team, isNew, onTrade }: Props) {
+export function PlayerCard({ player, team, isNew, shiftedFrom, onTrade }: Props) {
   const [first, ...rest] = player.name.split(' ')
   const last = rest.join(' ')
   const rating = player.overall
@@ -64,6 +66,15 @@ export function PlayerCard({ player, team, isNew, onTrade }: Props) {
         <div className="truncate text-[13px] font-semibold text-slate-100">{last || first}</div>
         {stat && <div className="truncate text-[10px] tabular-nums text-slate-500">{stat}</div>}
       </div>
+
+      {shiftedFrom && (
+        <span
+          className="rounded bg-rink-700 px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wide text-slate-400"
+          title={`Natural ${shiftedFrom === 'C' ? 'center' : shiftedFrom} playing here`}
+        >
+          {shiftedFrom}
+        </span>
+      )}
 
       {injury && (
         <span

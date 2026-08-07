@@ -1,27 +1,18 @@
 // The roster laid out by position, mirroring the reference design: forwards on
-// top (LW / C / RW), then defense and goalies (LD / RD / G).
+// top (LW / C / RW), then defense and goalies (LD / RD / G). Forward columns
+// come from the depth-chart builder, which shifts surplus natural centers to
+// the wings the way real lineups do.
 
+import { useMemo } from 'react'
 import type { Player, Position, Team } from '../types'
 import { PlayerCard } from './PlayerCard'
+import { buildForwardLines, type Slotted } from '../lib/depthChart'
 
 interface Props {
   team: Team
   newIds: Set<string>
   onTrade?: (player: Player) => void
 }
-
-const GROUPS: { key: Position; label: string }[][] = [
-  [
-    { key: 'LW', label: 'Left Wing' },
-    { key: 'C', label: 'Center' },
-    { key: 'RW', label: 'Right Wing' },
-  ],
-  [
-    { key: 'LD', label: 'Left Defense' },
-    { key: 'RD', label: 'Right Defense' },
-    { key: 'G', label: 'Goalie' },
-  ],
-]
 
 function Column({
   label,
@@ -31,7 +22,7 @@ function Column({
   onTrade,
 }: {
   label: string
-  players: Player[]
+  players: Slotted[]
   team: Team
   newIds: Set<string>
   onTrade?: (player: Player) => void
@@ -42,12 +33,13 @@ function Column({
         {label}
       </div>
       <div className="flex flex-col gap-2">
-        {players.map((p) => (
+        {players.map(({ player, shiftedFrom }) => (
           <PlayerCard
-            key={p.id}
-            player={p}
+            key={player.id}
+            player={player}
             team={team}
-            isNew={newIds.has(p.id)}
+            isNew={newIds.has(player.id)}
+            shiftedFrom={shiftedFrom}
             onTrade={onTrade}
           />
         ))}
@@ -62,20 +54,36 @@ function Column({
 }
 
 export function RosterBoard({ team, newIds, onTrade }: Props) {
-  const byPosition = (pos: Position) =>
+  const lines = useMemo(() => buildForwardLines(team.roster), [team.roster])
+
+  const byPosition = (pos: Position): Slotted[] =>
     team.roster
       .filter((p) => p.position === pos)
       .sort((a, b) => b.overall - a.overall)
+      .map((player) => ({ player }))
+
+  const rows: { label: string; players: Slotted[] }[][] = [
+    [
+      { label: 'Left Wing', players: lines.LW },
+      { label: 'Center', players: lines.C },
+      { label: 'Right Wing', players: lines.RW },
+    ],
+    [
+      { label: 'Left Defense', players: byPosition('LD') },
+      { label: 'Right Defense', players: byPosition('RD') },
+      { label: 'Goalie', players: byPosition('G') },
+    ],
+  ]
 
   return (
     <div className="space-y-6">
-      {GROUPS.map((row, i) => (
+      {rows.map((row, i) => (
         <div key={i} className="grid grid-cols-1 gap-4 sm:grid-cols-3">
           {row.map((g) => (
             <Column
-              key={g.key}
+              key={g.label}
               label={g.label}
-              players={byPosition(g.key)}
+              players={g.players}
               team={team}
               newIds={newIds}
               onTrade={onTrade}
