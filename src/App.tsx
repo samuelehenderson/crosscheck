@@ -8,6 +8,7 @@ import { PlayerSearch } from './components/PlayerSearch'
 import { RefreshButton } from './components/RefreshButton'
 import { ThemeToggle } from './components/ThemeToggle'
 import { FeedbackButton } from './components/FeedbackButton'
+import { AnnouncementBar } from './components/AnnouncementBar'
 import { TeamPage } from './pages/TeamPage'
 import { LeaguePage } from './pages/LeaguePage'
 import { FreeAgentsPage } from './pages/FreeAgentsPage'
@@ -141,6 +142,8 @@ function Shell() {
           </div>
         </div>
       </header>
+
+      <AnnouncementBar />
 
       <div className="mx-auto flex max-w-7xl gap-6 px-4 py-5">
         {/* Sidebar */}

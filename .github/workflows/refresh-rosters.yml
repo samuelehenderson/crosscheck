@@ -36,6 +36,7 @@ jobs:
         run: node scripts/fetch-news.mjs
         continue-on-error: true
       - name: Commit refreshed rosters
+        id: commit
         run: |
           if [[ -n "$(git status --porcelain)" ]]; then
             # Author as the repo owner (their GitHub noreply address) so Vercel
@@ -47,9 +48,33 @@ jobs:
             git commit -m "chore: refresh rosters, stats, injuries & free agents"
             git push
             echo "Committed refreshed rosters."
+            echo "changed=$(git show --stat --oneline HEAD | tail -1)" >> "$GITHUB_OUTPUT"
+            echo "committed=yes" >> "$GITHUB_OUTPUT"
           else
             echo "No roster changes to commit."
+            echo "committed=no" >> "$GITHUB_OUTPUT"
           fi
+      - name: Discord notify — data updated (needs DISCORD_WEBHOOK secret)
+        if: steps.commit.outputs.committed == 'yes'
+        env:
+          HOOK: ${{ secrets.DISCORD_WEBHOOK }}
+          SUMMARY: ${{ steps.commit.outputs.changed }}
+        run: |
+          [ -z "$HOOK" ] && { echo "No DISCORD_WEBHOOK secret — skipping notify."; exit 0; }
+          payload=$(printf '🔄 **IceMetrix data refresh** — new data is live.\n%s' "$SUMMARY" \
+            | head -c 1800 | python3 -c 'import json,sys; print(json.dumps({"content": sys.stdin.read()}))')
+          curl -sS -X POST -H "Content-Type: application/json" -d "$payload" "$HOOK" \
+            && echo "Notified Discord." || echo "Discord notify failed (non-fatal)."
+      - name: Discord notify — pipeline FAILED (needs DISCORD_WEBHOOK secret)
+        if: failure()
+        env:
+          HOOK: ${{ secrets.DISCORD_WEBHOOK }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          [ -z "$HOOK" ] && { echo "No DISCORD_WEBHOOK secret — skipping notify."; exit 0; }
+          curl -sS -X POST -H "Content-Type: application/json" \
+            -d "{\"content\": \"🚨 **IceMetrix data refresh FAILED** — site may serve stale data. Logs: $RUN_URL\"}" \
+            "$HOOK" && echo "Notified Discord." || echo "Discord notify failed (non-fatal)."
       - name: Trigger Vercel deploy hook (if configured)
         env:
           HOOK: ${{ secrets.VERCEL_DEPLOY_HOOK }}
