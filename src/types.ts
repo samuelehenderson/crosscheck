@@ -1,4 +1,4 @@
-// Core domain types for CrossCheck.
+// Core domain types.
 //
 // The data model is intentionally small and flat so it's easy to build on:
 // a league is a list of teams, a team is metadata + a roster, a roster is a

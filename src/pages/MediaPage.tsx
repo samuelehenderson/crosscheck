@@ -123,7 +123,7 @@ export function MediaPage() {
       <button
         onClick={() => setReading(featured)}
         className="block w-full overflow-hidden rounded-2xl border border-rink-700 text-left transition hover:border-ice-400/40"
-        style={{ background: 'linear-gradient(135deg, #1a2436 0%, #131b2b 50%, #0e1420 100%)' }}
+        style={{ background: 'linear-gradient(135deg, #1b232c 0%, #13191f 50%, #090e12 100%)' }}
       >
         <div className="space-y-3 p-5 sm:p-6">
           <div className="flex items-center gap-2">

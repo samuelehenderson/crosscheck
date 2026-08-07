@@ -11,21 +11,26 @@ import { LeaguePage } from './pages/LeaguePage'
 import { FreeAgentsPage } from './pages/FreeAgentsPage'
 import { LeadersPage } from './pages/LeadersPage'
 import { MediaPage } from './pages/MediaPage'
+import { ContractsPage } from './pages/ContractsPage'
 
 function BrandMark() {
-  // Crossed hockey sticks over a puck — reads as a hockey emblem, not an "×".
+  // Neon puck with a subtle dollar cut — payroll meets the rink.
   return (
-    <div className="grid h-9 w-9 place-items-center rounded-lg bg-rink-800 ring-1 ring-ice-400/30">
+    <div className="grid h-9 w-9 place-items-center rounded-lg bg-rink-850 ring-1 ring-ice-400/40">
       <svg viewBox="0 0 32 32" className="h-6 w-6" aria-hidden>
-        <g stroke="#a7cbf0" strokeWidth="2.6" strokeLinecap="round" fill="none">
-          {/* left stick + blade */}
-          <path d="M10 6.5 L20 22" />
-          <path d="M20 22 L24.5 20.5" />
-          {/* right stick + blade */}
-          <path d="M22 6.5 L12 22" />
-          <path d="M12 22 L7.5 20.5" />
+        <g stroke="#60d4fe" strokeWidth="2.2" strokeLinecap="round" fill="none">
+          {/* puck, side view */}
+          <ellipse cx="16" cy="12.5" rx="10" ry="4.4" />
+          <path d="M6 12.5 V19 c0 2.4 4.5 4.4 10 4.4 s10-2 10-4.4 V12.5" />
         </g>
-        <circle cx="16" cy="25.5" r="2.1" fill="#e5484d" />
+        {/* dollar tick on the puck face */}
+        <path
+          d="M16 15.2 V22.6 M18.1 16.6 h-3.2 a1.3 1.3 0 0 0 0 2.6 h2.2 a1.3 1.3 0 0 1 0 2.6 h-3.2"
+          stroke="#8ee0ff"
+          strokeWidth="1.4"
+          strokeLinecap="round"
+          fill="none"
+        />
       </svg>
     </div>
   )
@@ -36,8 +41,12 @@ function Brand() {
     <Link to="/" className="flex items-center gap-2">
       <BrandMark />
       <div className="leading-none">
-        <div className="text-sm font-black tracking-tight text-white">CROSSCHECK</div>
-        <div className="text-[10px] uppercase tracking-widest text-slate-500">NHL Trade Sim</div>
+        <div className="text-sm font-black tracking-tight text-white">
+          PUCK<span className="text-ice-400">PAYROLL</span>
+        </div>
+        <div className="text-[10px] uppercase tracking-widest text-slate-500">
+          Rosters · Trades · Contracts
+        </div>
       </div>
     </Link>
   )
@@ -93,6 +102,12 @@ function Shell() {
               className="rounded-lg px-3 py-1.5 text-sm font-medium text-slate-300 transition hover:bg-rink-850 hover:text-white"
             >
               Leaders
+            </Link>
+            <Link
+              to="/contracts"
+              className="rounded-lg px-3 py-1.5 text-sm font-medium text-slate-300 transition hover:bg-rink-850 hover:text-white"
+            >
+              Contracts
             </Link>
             <Link
               to="/media"
@@ -154,6 +169,17 @@ function Shell() {
                 League Leaders
               </NavLink>
               <NavLink
+                to="/contracts"
+                onClick={() => setMobileOpen(false)}
+                className={({ isActive }) =>
+                  `rounded-lg px-3 py-2 text-sm font-semibold transition ${
+                    isActive ? 'bg-rink-800 text-white' : 'text-slate-300 hover:bg-rink-850'
+                  }`
+                }
+              >
+                Contracts
+              </NavLink>
+              <NavLink
                 to="/media"
                 onClick={() => setMobileOpen(false)}
                 className={({ isActive }) =>
@@ -180,6 +206,7 @@ function Shell() {
             <Route path="/league" element={<LeaguePage />} />
             <Route path="/free-agents" element={<FreeAgentsPage />} />
             <Route path="/leaders" element={<LeadersPage />} />
+            <Route path="/contracts" element={<ContractsPage />} />
             <Route path="/media" element={<MediaPage />} />
             <Route path="*" element={<Navigate to="/team/FLA" replace />} />
           </Routes>
@@ -187,7 +214,8 @@ function Shell() {
       </div>
 
       <footer className="mx-auto max-w-7xl px-4 py-8 text-center text-xs text-slate-600">
-        CrossCheck · a roster & trade simulator for all 32 NHL teams · ratings are estimates
+        PuckPayroll · rosters, trades & contracts for all 32 NHL teams · ratings and dollars are
+        estimates
       </footer>
     </div>
   )

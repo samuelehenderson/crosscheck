@@ -1,4 +1,4 @@
-// CrossCheck simulation engine.
+// Season simulation engine.
 //
 // Given a league (array of teams), it derives each team's component strengths
 // from player ratings, ranks every team against the field, and converts those

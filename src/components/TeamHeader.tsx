@@ -59,7 +59,7 @@ export function TeamHeader({ team, before, after, hasTrades }: Props) {
     <div
       className="relative overflow-hidden rounded-2xl border border-rink-700 p-5 sm:p-6"
       style={{
-        background: `linear-gradient(135deg, ${team.colors.primary}22 0%, #131b2b 45%, #0e1420 100%)`,
+        background: `linear-gradient(135deg, ${team.colors.primary}22 0%, #13191f 45%, #090e12 100%)`,
       }}
     >
       <div className="flex flex-col gap-6 lg:flex-row lg:items-center">

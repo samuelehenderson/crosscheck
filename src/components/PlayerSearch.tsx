@@ -167,7 +167,7 @@ export function PlayerSearch() {
                       style={{
                         background: hit.team
                           ? `linear-gradient(135deg, ${hit.team.colors.primary}, ${hit.team.colors.secondary})`
-                          : 'linear-gradient(135deg, #2a3547, #18202f)',
+                          : 'linear-gradient(135deg, #263039, #13191f)',
                       }}
                     >
                       {initials(hit.name)}
