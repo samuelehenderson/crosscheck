@@ -129,7 +129,7 @@ export function PlayerSearch() {
   }
 
   return (
-    <div ref={rootRef} className="relative w-full max-w-xs">
+    <div ref={rootRef} className="relative w-full min-w-0 max-w-[8.5rem] sm:max-w-xs">
       <div className="flex items-center gap-2 rounded-lg border border-rink-700 bg-rink-850 px-2.5 py-1.5 focus-within:border-ice-400/50">
         <span className="text-slate-500">⌕</span>
         <input
