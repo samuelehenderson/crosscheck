@@ -32,6 +32,9 @@ jobs:
           X_WIRE_QUERY: ${{ secrets.X_WIRE_QUERY }}
         run: node scripts/fetch-wire.mjs
         continue-on-error: true
+      - name: Fetch news wire (RSS, no key needed)
+        run: node scripts/fetch-news.mjs
+        continue-on-error: true
       - name: Commit refreshed rosters
         run: |
           if [[ -n "$(git status --porcelain)" ]]; then
