@@ -16,6 +16,7 @@ import { LeadersPage } from './pages/LeadersPage'
 import { WirePage } from './pages/WirePage'
 import { ContractsPage } from './pages/ContractsPage'
 import { LandingPage } from './pages/LandingPage'
+import { AdminPage } from './pages/AdminPage'
 
 function BrandMark() {
   // Ice-crystal hexagon with a rising stat line — ice plus metrics.
@@ -231,6 +232,7 @@ function Shell() {
             <Route path="/leaders" element={<LeadersPage />} />
             <Route path="/contracts" element={<ContractsPage />} />
             <Route path="/wire" element={<WirePage />} />
+            <Route path="/admin" element={<AdminPage />} />
             {/* Shared /media links keep working. */}
             <Route path="/media" element={<Navigate to="/wire" replace />} />
             <Route path="*" element={<Navigate to="/" replace />} />
@@ -240,7 +242,10 @@ function Shell() {
 
       <footer className="mx-auto max-w-7xl px-4 py-8 text-center text-xs text-slate-600">
         IceMetrix · rosters, trades & contracts for all 32 NHL teams · ratings and dollars are
-        estimates
+        estimates ·{' '}
+        <Link to="/admin" className="text-slate-600 transition hover:text-slate-400">
+          admin
+        </Link>
       </footer>
     </div>
   )
