@@ -9,7 +9,7 @@
 // strangers from burning Action minutes by spamming the button.
 
 const OWNER = 'samuelehenderson'
-const REPO = 'crosscheck'
+const REPO = 'icemetrix'
 const WORKFLOW = 'refresh-rosters.yml'
 const COOLDOWN_MS = 5 * 60 * 1000
 
@@ -33,7 +33,7 @@ export default async function handler(req, res) {
         Authorization: `Bearer ${token}`,
         Accept: 'application/vnd.github+json',
         'X-GitHub-Api-Version': '2022-11-28',
-        'User-Agent': 'crosscheck-refresh-button',
+        'User-Agent': 'icemetrix-refresh-button',
         ...(init.headers || {}),
       },
     })

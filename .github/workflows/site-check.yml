@@ -21,7 +21,7 @@ jobs:
     steps:
       - name: Probe candidate URLs
         run: |
-          for u in "${{ inputs.url }}" "https://icemetricstemp.vercel.app" "https://crosscheck-dusky.vercel.app"; do
+          for u in "${{ inputs.url }}" "https://icemetricstemp.vercel.app"; do
             echo "== $u =="
             code=$(curl -sSL -o /tmp/page.html -w "%{http_code}" --max-time 20 "$u/" || echo "000")
             echo "HTTP $code"

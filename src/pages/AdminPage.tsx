@@ -10,7 +10,7 @@ import { TEAMS, nameKey } from '../data'
 import type { Player } from '../types'
 
 const OWNER = 'samuelehenderson'
-const REPO = 'crosscheck'
+const REPO = 'icemetrix'
 const BRANCH = 'main'
 const TOKEN_KEY = 'im.admin.token'
 
