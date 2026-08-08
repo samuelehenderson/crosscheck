@@ -1,0 +1,19 @@
+{
+  "updatedAt": "2026-08-07",
+  "title": "IceMetrix Prospect Board",
+  "note": "Sample board — replace with the official IceMetrix rankings (edit src/data/prospects.json or publish from the admin portal).",
+  "items": [
+    { "rank": 1, "name": "Gavin McKenna", "position": "LW", "rights": "2026 Draft", "league": "WHL", "note": "The consensus prize of the 2026 class — elite pace, elite hands, drives play every shift." },
+    { "rank": 2, "name": "Michael Misa", "position": "C", "rights": "CHI", "league": "OHL", "note": "High-end dual-threat center; the engine of Chicago's rebuild." },
+    { "rank": 3, "name": "James Hagens", "position": "C", "rights": "BOS", "league": "NCAA", "note": "Slick playmaking pivot — Boston's best center prospect in a generation." },
+    { "rank": 4, "name": "Porter Martone", "position": "RW", "rights": "PHI", "league": "OHL", "note": "Big-bodied winger with soft hands; pro frame already." },
+    { "rank": 5, "name": "Anton Frondell", "position": "C", "rights": "CHI", "league": "SHL", "note": "Heavy shot, pro habits, thrives against men in Sweden." },
+    { "rank": 6, "name": "Roger McQueen", "position": "C", "rights": "ANA", "league": "WHL", "note": "6'5\" center with skill to burn — health is the only question." },
+    { "rank": 7, "name": "Caleb Desnoyers", "position": "C", "rights": "UTA", "league": "QMJHL", "note": "Two-way center who wins every layer of the ice." },
+    { "rank": 8, "name": "Victor Eklund", "position": "RW", "rights": "NYI", "league": "SHL", "note": "Relentless motor; plays bigger than his frame every night." },
+    { "rank": 9, "name": "Radim Mrtka", "position": "RD", "rights": "BUF", "league": "WHL", "note": "6'6\" right shot who moves like a mid-sized defenseman." },
+    { "rank": 10, "name": "Jake O'Brien", "position": "C", "rights": "SEA", "league": "OHL", "note": "Vision-first playmaker; makes linemates better instantly." },
+    { "rank": 11, "name": "Justin Carbonneau", "position": "RW", "rights": "STL", "league": "QMJHL", "note": "Dynamic shot-creator with a scorer's release." },
+    { "rank": 12, "name": "JP Hurlbert", "position": "RW", "rights": "2026 Draft", "league": "WHL", "note": "The riser — production is forcing scouts to move him up boards." }
+  ]
+}
