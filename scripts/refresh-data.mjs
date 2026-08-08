@@ -1,4 +1,4 @@
-// Unified data refresh for CrossCheck. Runs in CI (GitHub's network can reach
+// Unified data refresh for IceMetrix. Runs in CI (GitHub's network can reach
 // the NHL/ESPN feeds) and writes every data file the app consumes:
 //
 //   src/data/{atlantic,metropolitan,central,pacific}.json  — rosters + ratings
@@ -33,7 +33,7 @@ const CURATED = JSON.parse(readFileSync(dataUrl('curatedRatings.json'), 'utf8'))
 const nameKey = (s) =>
   s.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[^a-z0-9]/g, '')
 const clamp = (n, lo, hi) => Math.max(lo, Math.min(hi, n))
-const UA = { 'User-Agent': 'Mozilla/5.0 (compatible; CrossCheck/1.0)', Accept: 'application/json' }
+const UA = { 'User-Agent': 'Mozilla/5.0 (compatible; IceMetrix/1.0)', Accept: 'application/json' }
 
 // ---------------------------------------------------------------------------
 // 1. League-wide stats, up to three seasons back (recency-weighted ratings).

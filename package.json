@@ -1,9 +1,9 @@
 {
-  "name": "crosscheck",
+  "name": "icemetrix",
   "private": true,
   "version": "0.1.0",
   "type": "module",
-  "description": "CrossCheck — an NHL roster & trade simulator for all 32 teams",
+  "description": "IceMetrix \u2014 NHL rosters, trades, contracts & live news for all 32 teams",
   "scripts": {
     "dev": "vite",
     "build": "tsc --noEmit && vite build",

@@ -21,8 +21,25 @@ import type { Player, Position, Signing, Team, TradeAsset } from './types'
 import { projectLeague } from './sim/engine'
 import { applyTrades } from './sim/trades'
 
-const TRADES_KEY = 'crosscheck.trades.v1'
-const SIGNINGS_KEY = 'crosscheck.signings.v1'
+const TRADES_KEY = 'icemetrix.trades.v1'
+const SIGNINGS_KEY = 'icemetrix.signings.v1'
+
+// One-time migration from the pre-rebrand storage keys, so nobody's saved
+// trades vanish with the name change.
+try {
+  for (const [oldKey, newKey] of [
+    ['crosscheck.trades.v1', TRADES_KEY],
+    ['crosscheck.signings.v1', SIGNINGS_KEY],
+  ]) {
+    const old = localStorage.getItem(oldKey)
+    if (old !== null && localStorage.getItem(newKey) === null) {
+      localStorage.setItem(newKey, old)
+    }
+    if (old !== null) localStorage.removeItem(oldKey)
+  }
+} catch {
+  // Private mode — nothing to migrate.
+}
 
 interface StoreValue {
   /** The league including pending signings (what trades operate on). */
