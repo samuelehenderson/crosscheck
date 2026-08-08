@@ -44,11 +44,26 @@ export default async function handler(req, res) {
   const text = lines.join('\n')
 
   // Discord caps content at 2000 chars; Slack is fine with more but keep parity.
-  const payload = url.includes('discord.com/api/webhooks')
-    ? { content: text.slice(0, 1990) }
+  const kind = url.includes('discord.com/api/webhooks')
+    ? 'discord'
     : url.includes('hooks.slack.com')
-      ? { text: text.slice(0, 1990) }
-      : { type, message, contact, page, ua }
+      ? 'slack'
+      : 'generic'
+  const payload =
+    kind === 'discord'
+      ? { content: text.slice(0, 1990) }
+      : kind === 'slack'
+        ? { text: text.slice(0, 1990) }
+        : { type, message, contact, page, ua }
+
+  // Failure responses carry the webhook HOST and upstream reply snippet so
+  // misconfiguration is diagnosable — never the path/token.
+  let host = 'invalid-url'
+  try {
+    host = new URL(url).host
+  } catch {
+    // fall through with invalid-url
+  }
 
   try {
     const hook = await fetch(url, {
@@ -59,9 +74,20 @@ export default async function handler(req, res) {
     if (hook.ok || hook.status === 204) {
       res.status(200).json({ ok: true })
     } else {
-      res.status(200).json({ ok: false, reason: `webhook-${hook.status}` })
+      let detail = ''
+      try {
+        detail = (await hook.text()).slice(0, 140)
+      } catch {
+        // body unavailable
+      }
+      res.status(200).json({ ok: false, reason: `webhook-${hook.status}`, host, kind, detail })
     }
   } catch (err) {
-    res.status(200).json({ ok: false, reason: err instanceof Error ? err.message : 'error' })
+    res.status(200).json({
+      ok: false,
+      reason: err instanceof Error ? err.message : 'error',
+      host,
+      kind,
+    })
   }
 }

@@ -32,6 +32,18 @@ jobs:
           done
           echo "== repo main updatedAt =="
           curl -sS --max-time 20 "https://raw.githubusercontent.com/${{ github.repository }}/main/public/updatedAt.json" || echo "RAW FETCH FAILED"
+      - name: Direct Discord test (needs DISCORD_WEBHOOK secret)
+        if: inputs.test_feedback == 'yes'
+        env:
+          HOOK: ${{ secrets.DISCORD_WEBHOOK }}
+        run: |
+          if [ -z "$HOOK" ]; then echo "No DISCORD_WEBHOOK secret set — skipping direct test."; exit 0; fi
+          host=$(echo "$HOOK" | sed -E 's#https?://([^/]+)/.*#\1#')
+          echo "Secret host: $host"
+          code=$(curl -sS -o /tmp/d.out -w "%{http_code}" --max-time 20 -X POST -H "Content-Type: application/json" \
+            -d '{"content":"Direct webhook test from GitHub Actions — pipeline alerts are wired. ✅"}' "$HOOK" || echo 000)
+          echo "Discord responded HTTP $code"
+          head -c 200 /tmp/d.out; echo ""
       - name: Test feedback webhook
         if: inputs.test_feedback == 'yes'
         run: |
