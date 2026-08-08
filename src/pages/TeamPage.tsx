@@ -14,6 +14,7 @@ import { SchedulePanel } from '../components/SchedulePanel'
 import { InjuriesPanel } from '../components/InjuriesPanel'
 import { TradePanel } from '../components/TradePanel'
 import { TradeModal } from '../components/TradeModal'
+import { TradeCenter } from '../components/TradeCenter'
 import { PlayerDetailModal } from '../components/PlayerDetailModal'
 import { STATS_SEASON } from '../data'
 
@@ -22,6 +23,7 @@ export function TeamPage() {
   const store = useStore()
   const [tradingPlayer, setTradingPlayer] = useState<Player | null>(null)
   const [detailPlayer, setDetailPlayer] = useState<Player | null>(null)
+  const [tradeCenterOpen, setTradeCenterOpen] = useState(false)
 
   // The after-trade version of this team is what we display on the board.
   const team = useMemo(
@@ -73,8 +75,15 @@ export function TeamPage() {
 
       <div className="grid grid-cols-1 gap-5 xl:grid-cols-[1fr_320px]">
         <div className="rounded-2xl border border-rink-700 bg-rink-900/40 p-4 sm:p-5">
-          <div className="mb-4 flex items-center justify-between">
+          <div className="mb-4 flex items-center justify-between gap-2">
             <h2 className="text-sm font-semibold uppercase tracking-widest text-slate-500">Roster</h2>
+            <div className="flex items-center gap-2">
+            <button
+              onClick={() => setTradeCenterOpen(true)}
+              className="rounded-lg bg-ice-400 px-3 py-1.5 text-sm font-bold text-rink-950 transition hover:bg-ice-300"
+            >
+              Trade Center
+            </button>
             <button
               onClick={() => store.setTradeMode(!store.tradeMode)}
               className={`rounded-lg px-3 py-1.5 text-sm font-semibold transition ${
@@ -85,6 +94,7 @@ export function TeamPage() {
             >
               {store.tradeMode ? '⇄ Trade mode: On' : '⇄ Trade'}
             </button>
+            </div>
           </div>
           <RosterBoard team={team} newIds={newIds} onTrade={selectPlayer} />
           <p className="mt-4 text-center text-[11px] text-slate-600">
@@ -113,6 +123,8 @@ export function TeamPage() {
           />
         </aside>
       </div>
+
+      {tradeCenterOpen && <TradeCenter team={team} onClose={() => setTradeCenterOpen(false)} />}
 
       {tradingPlayer && (
         <TradeModal
