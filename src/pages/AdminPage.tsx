@@ -6,6 +6,8 @@
 // redeploys the site (~2 min to live).
 
 import { useEffect, useMemo, useState } from 'react'
+import { TEAMS, nameKey } from '../data'
+import type { Player } from '../types'
 
 const OWNER = 'samuelehenderson'
 const REPO = 'crosscheck'
@@ -386,6 +388,442 @@ function MediaPanel() {
   )
 }
 
+// --- Player ratings ----------------------------------------------------------
+
+interface Rating {
+  overall: number
+  offense: number | null
+  defense: number | null
+  finishing: number | null
+  goaltending: number | null
+}
+
+const RATINGS_PATH = 'src/data/curatedRatings.json'
+
+function RatingsPanel({ onNeedApply }: { onNeedApply: () => void }) {
+  const [curated, setCurated] = useState<Record<string, Rating> | null>(null)
+  const [sha, setSha] = useState('')
+  const [query, setQuery] = useState('')
+  const [selected, setSelected] = useState<{ player: Player; teamId: string } | null>(null)
+  const [form, setForm] = useState<Rating | null>(null)
+  const [phase, setPhase] = useState<Phase>({ state: 'idle' })
+
+  const load = async () => {
+    try {
+      const res = await readJson<Record<string, Rating>>(RATINGS_PATH)
+      setCurated(res.value)
+      setSha(res.sha)
+    } catch (e) {
+      setPhase({ state: 'error', note: String(e) })
+    }
+  }
+  useEffect(() => {
+    void load()
+  }, [])
+
+  const pool = useMemo(
+    () =>
+      TEAMS.flatMap((t) => t.roster.map((player) => ({ player, teamId: t.id }))).sort(
+        (a, b) => b.player.overall - a.player.overall,
+      ),
+    [],
+  )
+
+  const results = useMemo(() => {
+    const q = query.trim().toLowerCase()
+    if (!q) return []
+    return pool.filter(({ player }) => player.name.toLowerCase().includes(q)).slice(0, 8)
+  }, [pool, query])
+
+  const pick = (hit: { player: Player; teamId: string }) => {
+    const key = nameKey(hit.player.name)
+    const existing = curated?.[key]
+    const p = hit.player
+    setSelected(hit)
+    setForm(
+      existing ?? {
+        overall: p.overall,
+        offense: p.offense ?? null,
+        defense: p.defense ?? null,
+        finishing: p.finishing ?? null,
+        goaltending: p.goaltending ?? null,
+      },
+    )
+    setQuery('')
+    setPhase({ state: 'idle' })
+  }
+
+  const save = async () => {
+    if (!selected || !form || !curated) return
+    setPhase({ state: 'busy', note: 'Saving…' })
+    try {
+      const key = nameKey(selected.player.name)
+      const next = { ...curated, [key]: form }
+      await writeJson(
+        RATINGS_PATH,
+        next,
+        sha,
+        `admin: rate ${selected.player.name} ${form.overall} OVR`,
+      )
+      setCurated(next)
+      setPhase({
+        state: 'ok',
+        note: 'Override saved. Hit "Apply ratings" so the rosters rebuild with it.',
+      })
+      onNeedApply()
+      await load()
+    } catch (e) {
+      setPhase({ state: 'error', note: `${e}` })
+    }
+  }
+
+  const removeOverride = async () => {
+    if (!selected || !curated) return
+    const key = nameKey(selected.player.name)
+    if (!curated[key]) return
+    setPhase({ state: 'busy', note: 'Removing…' })
+    try {
+      const next = { ...curated }
+      delete next[key]
+      await writeJson(RATINGS_PATH, next, sha, `admin: clear rating override for ${selected.player.name}`)
+      setCurated(next)
+      setPhase({
+        state: 'ok',
+        note: 'Override removed — this player goes back to pure stat-derived ratings on apply.',
+      })
+      onNeedApply()
+      await load()
+    } catch (e) {
+      setPhase({ state: 'error', note: `${e}` })
+    }
+  }
+
+  const isGoalie = selected?.player.position === 'G'
+  const num = (v: number | null) => (v == null ? '' : String(v))
+  const setField = (field: keyof Rating, raw: string) => {
+    if (!form) return
+    const v = raw === '' ? null : Math.max(40, Math.min(99, Number(raw) || 0))
+    setForm({ ...form, [field]: field === 'overall' ? (v ?? 40) : v })
+  }
+
+  return (
+    <div className={cardCls}>
+      <h2 className="text-lg font-black text-white">Player ratings</h2>
+      <p className="text-sm leading-relaxed text-slate-400">
+        Overrides beat the stat model. Saved changes bake into every roster on the next data
+        refresh — use "Apply ratings" below when you're done editing.
+      </p>
+      <div>
+        <label className={labelCls}>Find a player</label>
+        <input
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+          placeholder="Search all rosters…"
+          className={inputCls}
+        />
+        {results.length > 0 && (
+          <div className="mt-1.5 overflow-hidden rounded-lg border border-rink-700 bg-rink-900">
+            {results.map((hit) => {
+              const overridden = curated && curated[nameKey(hit.player.name)]
+              return (
+                <button
+                  key={`${hit.teamId}-${hit.player.id}`}
+                  onClick={() => pick(hit)}
+                  className="flex w-full items-center gap-2.5 px-2.5 py-2 text-left transition hover:bg-rink-800"
+                >
+                  <span className="flex-1 truncate text-sm text-slate-200">{hit.player.name}</span>
+                  {overridden && (
+                    <span className="rounded bg-amber-400/15 px-1.5 py-0.5 text-[9px] font-bold uppercase text-amber-300">
+                      Override
+                    </span>
+                  )}
+                  <span className="text-[11px] text-slate-500">
+                    {hit.teamId} · {hit.player.position} · {hit.player.overall}
+                  </span>
+                </button>
+              )
+            })}
+          </div>
+        )}
+      </div>
+
+      {selected && form && (
+        <div className="space-y-3 rounded-xl border border-rink-700 bg-rink-900/50 p-3">
+          <div className="flex items-center justify-between gap-2">
+            <div className="min-w-0">
+              <div className="truncate text-sm font-bold text-white">{selected.player.name}</div>
+              <div className="text-[11px] text-slate-500">
+                {selected.teamId} · {selected.player.position} · currently{' '}
+                {selected.player.overall} OVR
+                {curated?.[nameKey(selected.player.name)] ? ' · has override' : ' · stat-derived'}
+              </div>
+            </div>
+            <button
+              onClick={() => setSelected(null)}
+              className="text-slate-500 hover:text-slate-300"
+              aria-label="Clear selection"
+            >
+              ✕
+            </button>
+          </div>
+          <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+            <div>
+              <label className={labelCls}>Overall</label>
+              <input
+                type="number"
+                min={40}
+                max={99}
+                value={form.overall}
+                onChange={(e) => setField('overall', e.target.value)}
+                className={inputCls}
+              />
+            </div>
+            {isGoalie ? (
+              <div>
+                <label className={labelCls}>Goaltending</label>
+                <input
+                  type="number"
+                  min={40}
+                  max={99}
+                  value={num(form.goaltending)}
+                  onChange={(e) => setField('goaltending', e.target.value)}
+                  className={inputCls}
+                />
+              </div>
+            ) : (
+              <>
+                <div>
+                  <label className={labelCls}>Offense</label>
+                  <input
+                    type="number"
+                    min={40}
+                    max={99}
+                    value={num(form.offense)}
+                    onChange={(e) => setField('offense', e.target.value)}
+                    className={inputCls}
+                  />
+                </div>
+                <div>
+                  <label className={labelCls}>Defense</label>
+                  <input
+                    type="number"
+                    min={40}
+                    max={99}
+                    value={num(form.defense)}
+                    onChange={(e) => setField('defense', e.target.value)}
+                    className={inputCls}
+                  />
+                </div>
+                <div>
+                  <label className={labelCls}>Finishing</label>
+                  <input
+                    type="number"
+                    min={40}
+                    max={99}
+                    value={num(form.finishing)}
+                    onChange={(e) => setField('finishing', e.target.value)}
+                    className={inputCls}
+                  />
+                </div>
+              </>
+            )}
+          </div>
+          <div className="flex items-center justify-between gap-3">
+            {curated?.[nameKey(selected.player.name)] ? (
+              <button
+                onClick={() => void removeOverride()}
+                className="text-xs font-semibold text-down/80 hover:text-down"
+              >
+                Remove override
+              </button>
+            ) : (
+              <span />
+            )}
+            <button onClick={() => void save()} disabled={phase.state === 'busy'} className={primaryBtn}>
+              Save override
+            </button>
+          </div>
+        </div>
+      )}
+      <StatusNote phase={phase} />
+    </div>
+  )
+}
+
+// --- Prospect board ----------------------------------------------------------
+
+interface ProspectItem {
+  rank: number
+  name: string
+  position: string
+  rights: string
+  league: string
+  note?: string
+}
+
+const PROSPECTS_PATH = 'src/data/prospects.json'
+
+function ProspectsPanel() {
+  const [doc, setDoc] = useState<{
+    updatedAt: string
+    title: string
+    note?: string
+    items: ProspectItem[]
+  } | null>(null)
+  const [sha, setSha] = useState('')
+  const [dirty, setDirty] = useState(false)
+  const [phase, setPhase] = useState<Phase>({ state: 'idle' })
+  const [draft, setDraft] = useState({ name: '', position: 'C', rights: '', league: '', note: '' })
+
+  const load = async () => {
+    try {
+      const res = await readJson<NonNullable<typeof doc>>(PROSPECTS_PATH)
+      setDoc(res.value)
+      setSha(res.sha)
+      setDirty(false)
+    } catch (e) {
+      setPhase({ state: 'error', note: String(e) })
+    }
+  }
+  useEffect(() => {
+    void load()
+  }, [])
+
+  const renumber = (items: ProspectItem[]) => items.map((it, i) => ({ ...it, rank: i + 1 }))
+
+  const mutate = (items: ProspectItem[]) => {
+    if (!doc) return
+    setDoc({ ...doc, items: renumber(items) })
+    setDirty(true)
+  }
+
+  const move = (i: number, dir: -1 | 1) => {
+    if (!doc) return
+    const items = [...doc.items]
+    const j = i + dir
+    if (j < 0 || j >= items.length) return
+    ;[items[i], items[j]] = [items[j], items[i]]
+    mutate(items)
+  }
+
+  const add = () => {
+    if (!doc || !draft.name.trim()) return
+    mutate([
+      ...doc.items,
+      {
+        rank: doc.items.length + 1,
+        name: draft.name.trim(),
+        position: draft.position.trim() || 'C',
+        rights: draft.rights.trim() || 'Draft',
+        league: draft.league.trim() || '—',
+        ...(draft.note.trim() ? { note: draft.note.trim() } : {}),
+      },
+    ])
+    setDraft({ name: '', position: 'C', rights: '', league: '', note: '' })
+  }
+
+  const save = async () => {
+    if (!doc) return
+    setPhase({ state: 'busy', note: 'Publishing board…' })
+    try {
+      const out = {
+        ...doc,
+        updatedAt: new Date().toISOString().slice(0, 10),
+        note: undefined, // drop the "sample board" note once a real board ships
+      }
+      await writeJson(PROSPECTS_PATH, out, sha, 'admin: update prospect board')
+      setPhase({ state: 'ok', note: 'Board published — live in ~2 minutes.' })
+      await load()
+    } catch (e) {
+      setPhase({ state: 'error', note: `${e}` })
+    }
+  }
+
+  return (
+    <div className={cardCls}>
+      <div className="flex items-center justify-between gap-2">
+        <h2 className="text-lg font-black text-white">Prospect board</h2>
+        <button onClick={() => void save()} disabled={!dirty || phase.state === 'busy'} className={primaryBtn}>
+          Publish board
+        </button>
+      </div>
+      {doc ? (
+        <>
+          <ul className="space-y-1">
+            {doc.items.map((it, i) => (
+              <li key={`${it.name}-${i}`} className="flex items-center gap-2 rounded-lg bg-rink-900/50 px-2 py-1.5 text-xs">
+                <span className="w-5 text-right font-black tabular-nums text-ice-400">{it.rank}</span>
+                <span className="min-w-0 flex-1 truncate text-slate-200">
+                  <span className="font-semibold">{it.name}</span>{' '}
+                  <span className="text-slate-500">
+                    {it.position} · {it.league} · {it.rights}
+                  </span>
+                </span>
+                <button onClick={() => move(i, -1)} className="text-slate-500 hover:text-white" aria-label="Move up">
+                  ▲
+                </button>
+                <button onClick={() => move(i, 1)} className="text-slate-500 hover:text-white" aria-label="Move down">
+                  ▼
+                </button>
+                <button
+                  onClick={() => mutate(doc.items.filter((_, j) => j !== i))}
+                  className="font-semibold text-down/80 hover:text-down"
+                >
+                  remove
+                </button>
+              </li>
+            ))}
+          </ul>
+          <div className="space-y-2 rounded-xl border border-rink-700 bg-rink-900/50 p-3">
+            <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
+              <input
+                value={draft.name}
+                onChange={(e) => setDraft({ ...draft, name: e.target.value })}
+                placeholder="Name"
+                className={`${inputCls} col-span-2`}
+              />
+              <input
+                value={draft.position}
+                onChange={(e) => setDraft({ ...draft, position: e.target.value })}
+                placeholder="Pos"
+                className={inputCls}
+              />
+              <input
+                value={draft.league}
+                onChange={(e) => setDraft({ ...draft, league: e.target.value })}
+                placeholder="League"
+                className={inputCls}
+              />
+              <input
+                value={draft.rights}
+                onChange={(e) => setDraft({ ...draft, rights: e.target.value })}
+                placeholder="Rights (TOR / 2026 Draft)"
+                className={`${inputCls} col-span-2`}
+              />
+              <input
+                value={draft.note}
+                onChange={(e) => setDraft({ ...draft, note: e.target.value })}
+                placeholder="One-line scouting note (optional)"
+                className={`${inputCls} col-span-2`}
+              />
+            </div>
+            <button
+              onClick={add}
+              disabled={!draft.name.trim()}
+              className="w-full rounded-lg bg-rink-700 py-1.5 text-xs font-semibold text-slate-200 transition hover:bg-rink-600 disabled:opacity-40"
+            >
+              Add to board
+            </button>
+          </div>
+        </>
+      ) : (
+        <p className="text-xs text-slate-500">Loading board…</p>
+      )}
+      <StatusNote phase={phase} />
+    </div>
+  )
+}
+
 // --- Data refresh ------------------------------------------------------------
 
 function RefreshPanel() {
@@ -427,10 +865,51 @@ function RefreshPanel() {
 
 // --- Page --------------------------------------------------------------------
 
+type Tab = 'publish' | 'ratings' | 'prospects' | 'data'
+
+const TABS: { key: Tab; label: string }[] = [
+  { key: 'publish', label: 'Publish' },
+  { key: 'ratings', label: 'Ratings' },
+  { key: 'prospects', label: 'Prospects' },
+  { key: 'data', label: 'Data' },
+]
+
+function ApplyRatingsBar({ onDone }: { onDone: () => void }) {
+  const [phase, setPhase] = useState<Phase>({ state: 'idle' })
+  const apply = async () => {
+    setPhase({ state: 'busy', note: 'Dispatching rebuild…' })
+    try {
+      const res = await gh('/actions/workflows/refresh-rosters.yml/dispatches', {
+        method: 'POST',
+        body: JSON.stringify({ ref: BRANCH }),
+      })
+      if (res.status !== 204) throw new Error(`HTTP ${res.status}`)
+      setPhase({ state: 'ok', note: 'Rebuilding — new ratings live in a few minutes.' })
+      window.setTimeout(onDone, 4000)
+    } catch (e) {
+      setPhase({ state: 'error', note: `${e}` })
+    }
+  }
+  return (
+    <div className="flex items-center justify-between gap-3 rounded-xl border border-amber-400/40 bg-amber-400/10 px-3.5 py-2.5">
+      <span className="text-xs font-semibold text-amber-300">
+        {phase.state === 'idle'
+          ? 'Rating overrides saved — apply them so rosters rebuild.'
+          : (phase.note ?? '')}
+      </span>
+      <button onClick={() => void apply()} disabled={phase.state === 'busy'} className={primaryBtn}>
+        Apply ratings
+      </button>
+    </div>
+  )
+}
+
 export function AdminPage() {
   const [user, setUser] = useState<string | null>(null)
   const hasToken = useMemo(() => Boolean(getToken()), [])
   const [ready, setReady] = useState(hasToken)
+  const [tab, setTab] = useState<Tab>('publish')
+  const [needApply, setNeedApply] = useState(false)
 
   const signOut = () => {
     try {
@@ -448,7 +927,8 @@ export function AdminPage() {
         <div>
           <h1 className="text-2xl font-black text-white">Admin</h1>
           <p className="text-sm text-slate-400">
-            Publish announcements and media, and refresh the data — straight through GitHub.
+            Announcements, media, player ratings, the prospect board, and data — all straight
+            through GitHub.
           </p>
         </div>
         {ready && (
@@ -467,12 +947,36 @@ export function AdminPage() {
         />
       ) : (
         <>
-          <AnnouncementsPanel />
-          <MediaPanel />
-          <RefreshPanel />
+          <div className="flex gap-1.5">
+            {TABS.map((t) => (
+              <button
+                key={t.key}
+                onClick={() => setTab(t.key)}
+                className={`rounded-full px-3.5 py-1.5 text-xs font-semibold transition ${
+                  tab === t.key ? 'bg-ice-400 text-rink-950' : 'bg-rink-700 text-slate-300 hover:text-white'
+                }`}
+              >
+                {t.label}
+              </button>
+            ))}
+          </div>
+
+          {needApply && <ApplyRatingsBar onDone={() => setNeedApply(false)} />}
+
+          {tab === 'publish' && (
+            <>
+              <AnnouncementsPanel />
+              <MediaPanel />
+            </>
+          )}
+          {tab === 'ratings' && <RatingsPanel onNeedApply={() => setNeedApply(true)} />}
+          {tab === 'prospects' && <ProspectsPanel />}
+          {tab === 'data' && <RefreshPanel />}
+
           <p className="text-center text-[11px] leading-relaxed text-slate-600">
             Every save is a commit to <span className="font-mono">{OWNER}/{REPO}</span> — the site
-            redeploys itself, so changes are live in about two minutes.
+            redeploys itself, so changes are live in about two minutes. Rating overrides
+            additionally need "Apply ratings" (a data rebuild) to bake into rosters.
           </p>
         </>
       )}
