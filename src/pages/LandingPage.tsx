@@ -7,6 +7,7 @@ import { useStore } from '../store'
 import { FREE_AGENTS, STATS_SEASON } from '../data'
 import { TeamBadge } from '../components/TeamBadge'
 import { WirePanel } from '../components/WirePanel'
+import { FavoriteTeamCard } from '../components/FavoriteTeamCard'
 import type { Team } from '../types'
 
 const DIVISIONS: Team['division'][] = ['Atlantic', 'Central', 'Metropolitan', 'Pacific']
@@ -39,6 +40,11 @@ const FEATURES = [
     to: '/leaders',
     title: 'League Leaders',
     desc: `Live ${STATS_SEASON || 'season'} stat races across goals, assists, points, and goaltending.`,
+  },
+  {
+    to: '/prospects',
+    title: 'Prospects',
+    desc: 'The IceMetrix prospect board, plus a draft lottery simulator that respects your trades.',
   },
   {
     to: '/wire',
@@ -126,6 +132,9 @@ export function LandingPage() {
           ))}
         </div>
       </section>
+
+      {/* Your team, if you've picked one */}
+      <FavoriteTeamCard />
 
       {/* Live news feed, front and center */}
       <WirePanel />

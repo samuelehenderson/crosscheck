@@ -17,6 +17,7 @@ import { WirePage } from './pages/WirePage'
 import { ContractsPage } from './pages/ContractsPage'
 import { LandingPage } from './pages/LandingPage'
 import { AdminPage } from './pages/AdminPage'
+import { ProspectsPage } from './pages/ProspectsPage'
 
 function BrandMark() {
   // Ice-crystal hexagon with a rising stat line — ice plus metrics.
@@ -128,6 +129,12 @@ function Shell() {
               Contracts
             </Link>
             <Link
+              to="/prospects"
+              className="whitespace-nowrap rounded-lg px-3 py-1.5 text-sm font-medium text-slate-300 transition hover:bg-rink-850 hover:text-white"
+            >
+              Prospects
+            </Link>
+            <Link
               to="/wire"
               className="whitespace-nowrap rounded-lg px-3 py-1.5 text-sm font-medium text-slate-300 transition hover:bg-rink-850 hover:text-white"
             >
@@ -203,6 +210,17 @@ function Shell() {
                 Contracts
               </NavLink>
               <NavLink
+                to="/prospects"
+                onClick={() => setMobileOpen(false)}
+                className={({ isActive }) =>
+                  `rounded-lg px-3 py-2 text-sm font-semibold transition ${
+                    isActive ? 'bg-rink-800 text-white' : 'text-slate-300 hover:bg-rink-850'
+                  }`
+                }
+              >
+                Prospects
+              </NavLink>
+              <NavLink
                 to="/wire"
                 onClick={() => setMobileOpen(false)}
                 className={({ isActive }) =>
@@ -231,6 +249,7 @@ function Shell() {
             <Route path="/free-agents" element={<FreeAgentsPage />} />
             <Route path="/leaders" element={<LeadersPage />} />
             <Route path="/contracts" element={<ContractsPage />} />
+            <Route path="/prospects" element={<ProspectsPage />} />
             <Route path="/wire" element={<WirePage />} />
             <Route path="/admin" element={<AdminPage />} />
             {/* Shared /media links keep working. */}

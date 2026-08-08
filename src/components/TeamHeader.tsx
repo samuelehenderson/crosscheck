@@ -9,6 +9,26 @@ import { Arrow, DeltaBadge, ValuePill } from './ui'
 import { delta, pct, points } from '../lib/format'
 import { simulateSeasons, type SimSummary } from '../sim/monteCarlo'
 import { useStore } from '../store'
+import { useFavorite } from '../lib/favorite'
+
+function FavoriteStar({ teamId }: { teamId: string }) {
+  const [fav, setFav] = useFavorite()
+  const isFav = fav === teamId
+  return (
+    <button
+      onClick={() => setFav(isFav ? null : teamId)}
+      className={`absolute right-4 top-4 z-10 grid h-9 w-9 place-items-center rounded-lg text-lg transition ${
+        isFav
+          ? 'bg-amber-400/20 text-amber-300 ring-1 ring-amber-400/40'
+          : 'text-slate-500 ring-1 ring-rink-700 hover:text-amber-300'
+      }`}
+      title={isFav ? 'Your team — tap to unfavorite' : 'Make this your team'}
+      aria-label={isFav ? 'Unfavorite team' : 'Favorite team'}
+    >
+      {isFav ? '★' : '☆'}
+    </button>
+  )
+}
 
 interface Props {
   team: Team
@@ -62,6 +82,7 @@ export function TeamHeader({ team, before, after, hasTrades }: Props) {
         background: `linear-gradient(135deg, ${team.colors.primary}22 0%, var(--grad-mid) 45%, var(--grad-end) 100%)`,
       }}
     >
+      <FavoriteStar teamId={team.id} />
       <div className="flex flex-col gap-6 lg:flex-row lg:items-center">
         {/* Crest + headline number */}
         <div className="flex items-center gap-5">
